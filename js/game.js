@@ -66,11 +66,13 @@ export function formatClip(seconds) {
 }
 
 // Draws songs in random order without repeats until every song has been played.
+// Upcoming songs sit in a queue, so peek() can show which ones come next (the
+// game uses that to load them in the background).
 export class ShuffleBag {
   constructor(items, random = Math.random) {
     this.items = [...items];
     this.random = random;
-    this.bag = [];
+    this.queue = [];
     this.last = null;
   }
 
@@ -78,29 +80,49 @@ export class ShuffleBag {
     return this.items.length;
   }
 
-  refill() {
-    this.bag = [...this.items];
-    for (let i = this.bag.length - 1; i > 0; i -= 1) {
+  // Add one full shuffled round of every song to the end of the queue.
+  addRound() {
+    const round = [...this.items];
+    for (let i = round.length - 1; i > 0; i -= 1) {
       const j = Math.floor(this.random() * (i + 1));
-      [this.bag[i], this.bag[j]] = [this.bag[j], this.bag[i]];
+      [round[i], round[j]] = [round[j], round[i]];
     }
-    // Never play the same song twice in a row across a reshuffle.
-    if (this.bag.length > 1 && this.bag[this.bag.length - 1] === this.last) {
-      [this.bag[0], this.bag[this.bag.length - 1]] = [this.bag[this.bag.length - 1], this.bag[0]];
+    // Never the same song twice in a row where two rounds meet.
+    const before = this.queue.length ? this.queue[this.queue.length - 1] : this.last;
+    if (round.length > 1 && round[0] === before) {
+      [round[0], round[round.length - 1]] = [round[round.length - 1], round[0]];
     }
+    this.queue.push(...round);
   }
 
   next() {
     if (!this.items.length) return null;
-    if (!this.bag.length) this.refill();
-    this.last = this.bag.pop();
+    if (!this.queue.length) this.addRound();
+    // remove() can leave the same song twice in a row where two rounds meet.
+    if (this.queue[0] === this.last && this.queue.length > 1) {
+      [this.queue[0], this.queue[1]] = [this.queue[1], this.queue[0]];
+    }
+    this.last = this.queue.shift();
     return this.last;
+  }
+
+  // The next n songs, without taking them.
+  peek(n) {
+    if (!this.items.length) return [];
+    while (this.queue.length < n) this.addRound();
+    return this.queue.slice(0, n);
   }
 
   remove(item) {
     this.items = this.items.filter((x) => x !== item);
-    this.bag = this.bag.filter((x) => x !== item);
+    this.queue = this.queue.filter((x) => x !== item);
   }
+}
+
+// Where the clips start: the hook in "hook" mode, otherwise the start of the song.
+export function clipStart(song, mode) {
+  const t = mode === 'hook' ? song.hook : song.start;
+  return Math.max(0, Number(t) || 0);
 }
 
 // One song to guess.
@@ -115,8 +137,7 @@ export class Round {
   }
 
   get startTime() {
-    const t = this.mode === 'hook' ? this.song.hook : this.song.start;
-    return Math.max(0, Number(t) || 0);
+    return clipStart(this.song, this.mode);
   }
 
   // Index of the clip that is unlocked now (0 = the 0.5 s clip).

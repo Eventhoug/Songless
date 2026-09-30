@@ -148,3 +148,50 @@ test('?songs= only accepts a .json file on the same site', () => {
     assert.equal(url(bad), DEFAULT_SONGS_URL, bad);
   }
 });
+
+test('peek shows the songs next() will give, without repeats in a round', () => {
+  let seed = 7;
+  const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const bag = new ShuffleBag(songs, random);
+  for (let i = 0; i < 23; i += 1) {
+    const ahead = bag.peek(2);
+    assert.equal(ahead.length, 2);
+    const drawn = bag.next();
+    assert.equal(drawn, ahead[0]);
+    assert.equal(bag.peek(1)[0], ahead[1]);
+    assert.notEqual(bag.peek(1)[0], drawn);
+  }
+  // Rounds stay complete: 5 draws in a row are 5 different songs.
+  const bag2 = new ShuffleBag(songs, random);
+  for (let pass = 0; pass < 4; pass += 1) {
+    bag2.peek(3);
+    const seen = new Set();
+    for (let i = 0; i < songs.length; i += 1) seen.add(bag2.next().id);
+    assert.equal(seen.size, songs.length);
+  }
+});
+
+test('peek with removed songs and tiny pools', () => {
+  const bag = new ShuffleBag([creep, karma]);
+  const ahead = bag.peek(2);
+  bag.remove(ahead[0]);
+  assert.deepEqual(bag.peek(2), [karma === ahead[0] ? creep : karma, karma === ahead[0] ? creep : karma]);
+  const single = new ShuffleBag([creep]);
+  assert.deepEqual(single.peek(2), [creep, creep]);
+  assert.deepEqual(new ShuffleBag([]).peek(2), []);
+  const pair = new ShuffleBag([creep, karma]);
+  let previous = null;
+  for (let i = 0; i < 20; i += 1) {
+    pair.peek(2);
+    const song = pair.next();
+    assert.notEqual(song, previous);
+    previous = song;
+  }
+});
+
+test('clipStart picks the hook or the start', async () => {
+  const { clipStart } = await import('../js/game.js');
+  assert.equal(clipStart(karma, 'hook'), 70);
+  assert.equal(clipStart(karma, 'start'), 1);
+  assert.equal(clipStart({ hook: null, start: undefined }, 'hook'), 0);
+});

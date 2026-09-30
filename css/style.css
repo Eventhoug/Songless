@@ -533,6 +533,21 @@ select:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
   border: 0;
 }
 
+/* PlayerPool: the players are stacked; the active one is on top and the others,
+   still loading the next songs, are hidden behind it. */
+.pool-slot { position: absolute; inset: 0; z-index: 0; background: #000; }
+
+.pool-slot.active { z-index: 1; }
+
+.pool-slot > div,
+.pool-slot iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .mock-player {
   display: flex;
   align-items: center;

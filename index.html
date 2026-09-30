@@ -92,7 +92,8 @@
            hidden behind the page with .offscreen while you are guessing. -->
       <div class="reveal offscreen" id="reveal" aria-hidden="true" inert>
         <div class="reveal-card">
-          <div class="video-frame"><div id="player"></div></div>
+          <!-- PlayerPool puts one YouTube player per slot in here (current song + the next two). -->
+          <div class="video-frame" id="player-frame"></div>
           <div class="reveal-info">
             <p class="reveal-result" id="reveal-result"></p>
             <h2 class="reveal-title" id="reveal-title"></h2>
