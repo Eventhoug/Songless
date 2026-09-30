@@ -196,13 +196,22 @@ class ScoreTests(unittest.TestCase):
 
 
 class FakeYouTube:
-    """Stands in for yt-dlp. `videos` maps a title word to search results."""
+    """Stands in for yt-dlp. `results` (and `music`) map a title word to search results."""
 
-    def __init__(self, results, details):
+    def __init__(self, results, details, music=None):
         self.results = results
+        self.music_results = music or {}
         self.details_by_id = details
         self.searches = []
+        self.music_searches = []
         self.detail_calls = []
+
+    def music(self, query):
+        self.music_searches.append(query)
+        for word, items in self.music_results.items():
+            if word.lower() in query.lower():
+                return items
+        return []
 
     def search(self, query):
         self.searches.append(query)
@@ -236,8 +245,8 @@ class ResolverTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def resolver(self, offline=False):
-        return songlib.Resolver(self.cache, offline=offline, delay=0,
-                                search=self.fake.search, details=self.fake.details)
+        return songlib.Resolver(self.cache, offline=offline, delay=0, search=self.fake.search,
+                                details=self.fake.details, music_search=self.fake.music)
 
     def test_skips_non_embeddable_and_caches(self):
         rec, status = self.resolver().lookup("Radiohead", "Creep", 239)
@@ -280,6 +289,107 @@ class SelectTests(unittest.TestCase):
         self.assertEqual(reasons["Missing"], "not found on YouTube")
 
 
+class MusicMatchTests(unittest.TestCase):
+    def test_music_title(self):
+        self.assertTrue(songlib.music_title_ok("Creep", "Creep"))
+        self.assertTrue(songlib.music_title_ok("Let Down (Remastered)", "Let Down"))
+        self.assertTrue(songlib.music_title_ok("Street Spirit (Fade Out)", "Street Spirit (Fade Out)"))
+        self.assertFalse(songlib.music_title_ok("Creep (Live)", "Creep"))
+        self.assertFalse(songlib.music_title_ok("Flowers (Demo)", "Flowers"))
+        self.assertFalse(songlib.music_title_ok("Counting Stars (2023 Version)", "Counting Stars"))
+        self.assertFalse(songlib.music_title_ok("Karma Police", "Creep"))
+        self.assertTrue(songlib.music_title_ok("Live Forever", "Live Forever"))
+
+    def test_artist_matches(self):
+        self.assertTrue(songlib.artist_matches({"artists": ["Radiohead"]}, "Radiohead"))
+        self.assertTrue(songlib.artist_matches({"channel": "The Killers - Topic"}, "The Killers"))
+        self.assertTrue(songlib.artist_matches({"artists": ["Macklemore", "Ryan Lewis"]},
+                                               "Macklemore & Ryan Lewis"))
+        self.assertTrue(songlib.artist_matches({"artists": ["MØ"]}, "MØ"))
+        self.assertFalse(songlib.artist_matches({"title": "Moment of truth", "channel": "Momo"}, "MØ"))
+        self.assertTrue(songlib.artist_matches({"channel": "U2"}, "U2"))
+        self.assertFalse(songlib.artist_matches({"artists": ["Some Cover Band"], "channel": "Covers"},
+                                                "Radiohead"))
+
+
+class MusicResolverTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.cache = Path(self.tmp.name) / "cache.json"
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def resolver(self, fake):
+        return songlib.Resolver(self.cache, delay=0, search=fake.search, details=fake.details,
+                                music_search=fake.music)
+
+    def test_studio_track_first(self):
+        fake = FakeYouTube(
+            {"Creep": [candidate("video000001", "Radiohead - Creep", "Radiohead", 237)]},
+            {"track000001": {"playable_in_embed": True, "duration": 238, "artists": ["Radiohead"],
+                             "channel": "Radiohead", "track": "Creep", "view_count": 5_000_000,
+                             "heatmap": heatmap(238, 58)}},
+            music={"Creep": [{"id": "livetrack01", "title": "Creep (Live)"},
+                             {"id": "track000001", "title": "Creep"}]},
+        )
+        rec, status = self.resolver(fake).lookup("Radiohead", "Creep")
+        self.assertEqual((status, rec["yt"], rec["track"]), ("new", "track000001", True))
+        self.assertEqual(rec["hook"], 58.0)  # peak point starts at 59.5 s, minus 1.5 s
+        self.assertEqual(fake.searches, [])  # no normal YouTube search needed
+        self.assertEqual(fake.detail_calls, ["track000001"])  # the live version was never tried
+
+    def test_wrong_artist_falls_back_to_video(self):
+        fake = FakeYouTube(
+            {"Creep": [candidate("video000001", "Radiohead - Creep (Official Audio)", "Radiohead", 237)]},
+            {"cover000001": {"playable_in_embed": True, "duration": 230, "artists": ["Cover Band"],
+                             "channel": "Cover Band - Topic", "track": "Creep"},
+             "video000001": {"playable_in_embed": True, "duration": 237, "channel": "Radiohead"}},
+            music={"Creep": [{"id": "cover000001", "title": "Creep"}]},
+        )
+        rec, status = self.resolver(fake).lookup("Radiohead", "Creep")
+        self.assertEqual((status, rec["yt"], rec["track"]), ("new", "video000001", False))
+        self.assertEqual(rec["candidates"][0]["error"], "different artist")
+
+    def upgrade_cache(self):
+        self.cache.write_text(json.dumps({"radiohead - creep": {
+            "yt": "video000001", "channel": "Radiohead", "duration": 237, "hook": 60.0,
+            "detailed": True, "candidates": [{"id": "video000001", "source": "web"}]}}))
+
+    def test_upgrade_swaps_video_and_keeps_hook(self):
+        self.upgrade_cache()
+        fake = FakeYouTube({}, {"track000001": {"playable_in_embed": True, "duration": 238,
+                                                "artists": ["Radiohead"], "track": "Creep"}},
+                           music={"Creep": [{"id": "track000001", "title": "Creep"}]})
+        resolver = self.resolver(fake)
+        self.assertTrue(resolver.needs_upgrade("radiohead - creep"))
+        rec, status = resolver.lookup("Radiohead", "Creep")  # without upgrade: cached video
+        self.assertEqual((status, rec["yt"]), ("cache", "video000001"))
+        rec, status = resolver.lookup("Radiohead", "Creep", upgrade=True)
+        self.assertEqual((status, rec["yt"], rec["hook"], rec["hookFrom"]),
+                         ("new", "track000001", 60.0, "video000001"))
+        self.assertFalse(resolver.needs_upgrade("radiohead - creep"))
+
+    def test_upgrade_keeps_old_video_when_nothing_better(self):
+        self.upgrade_cache()
+        fake = FakeYouTube({}, {}, music={})
+        resolver = self.resolver(fake)
+        rec, status = resolver.lookup("Radiohead", "Creep", upgrade=True)
+        self.assertEqual((status, rec["yt"]), ("kept (no better video found)", "video000001"))
+        self.assertEqual(fake.searches, [])
+        self.assertFalse(resolver.needs_upgrade("radiohead - creep"))
+        rec, status = resolver.lookup("Radiohead", "Creep", upgrade=True)
+        self.assertEqual(status, "cache")
+
+    def test_upgrade_different_length_does_not_copy_hook(self):
+        self.upgrade_cache()
+        fake = FakeYouTube({}, {"track000001": {"playable_in_embed": True, "duration": 200,
+                                                "artists": ["Radiohead"], "track": "Creep"}},
+                           music={"Creep": [{"id": "track000001", "title": "Creep"}]})
+        rec, _ = self.resolver(fake).lookup("Radiohead", "Creep", upgrade=True)
+        self.assertIsNone(rec["hook"])
+
+
 class BuildTests(unittest.TestCase):
     def test_build_writes_songs_json(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -302,7 +412,8 @@ class BuildTests(unittest.TestCase):
                 "--cache", str(tmp / "cache.json"), "--report", str(tmp / "report.txt"),
                 "--delay", "0"])
             resolver = songlib.Resolver(tmp / "cache.json", delay=0,
-                                        search=fake.search, details=fake.details)
+                                        search=fake.search, details=fake.details,
+                                        music_search=fake.music)
             with mock.patch("builtins.print"):
                 self.assertEqual(build_songs.build(args, resolver), 0)
             data = json.loads((tmp / "songs.json").read_text())
@@ -332,7 +443,8 @@ class BuildTests(unittest.TestCase):
                 "--limit", "1", "--songs", str(tmp / "songs.txt"), "--out", str(tmp / "songs.json"),
                 "--cache", str(tmp / "cache.json"), "--report", str(tmp / "report.txt")])
             resolver = songlib.Resolver(tmp / "cache.json", delay=0,
-                                        search=fake.search, details=fake.details)
+                                        search=fake.search, details=fake.details,
+                                        music_search=fake.music)
             with mock.patch("builtins.print"):
                 build_songs.build(args, resolver)
             data = json.loads((tmp / "songs.json").read_text())
@@ -394,6 +506,7 @@ class ImportTests(unittest.TestCase):
             fake = FakeYouTube(results, details)
             with mock.patch.object(songlib, "youtube_search", fake.search), \
                     mock.patch.object(songlib, "youtube_details", fake.details), \
+                    mock.patch.object(songlib, "youtube_music_search", fake.music), \
                     mock.patch("builtins.print"):
                 code = import_spotify.main([
                     str(csv_path), "--songs", str(songs_txt), "--cache", str(tmp / "cache.json"),

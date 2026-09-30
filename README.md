@@ -25,6 +25,9 @@ python tools/build_songs.py
 
 This writes `data/songs.json`, which is the file the game reads.
 
+- **Which video is used.** For each song the script first looks for the official studio track in the "Songs" section of YouTube Music. That is the same recording as on Spotify, and it starts at 0:00, so *Start of song* mode starts with the music. It checks that the artist matches and skips live, remix, demo and cover versions. If no studio track can be embedded, it uses a normal YouTube search and picks the best official video or audio upload.
+- **Older song lists.** If your `yt_cache.json` was made before this change, most songs use music videos. Run `python tools/build_songs.py --upgrade` once to swap them for studio tracks. Songs where nothing better is found keep their current video.
+
 - **First run.** With about 400 songs the first run takes a while, roughly 30 to 60 minutes, because it pauses between requests so YouTube doesn't block it.
 - **Stopping and resuming.** You can stop with Ctrl+C at any time. Everything found so far is cached in `data/yt_cache.json`, so running the command again continues where it stopped.
 - **The report.** At the end you get `data/build_report.txt`, which lists songs it could not find and hooks it had to guess.
@@ -124,6 +127,7 @@ Open **Add or fix a song** (`editor.html`) at the bottom of the game.
 ## How the hook is found
 
 - **Most replayed.** `build_songs.py` reads YouTube's "Most replayed" graph for the video. yt-dlp calls it `heatmap` (yt-dlp, 2026). It ignores the first and last 8% of the song, takes the most replayed moment and starts 1.5 s before it.
+- **Hooks after `--upgrade`.** A studio track often has no graph. If it is the same length (within 3 s) as the video used before, it is the same audio, so the earlier hook is kept.
 - **Estimated hooks.** Some videos have no graph. For those the hook is estimated at 30% of the song, and the build report and the editor mark it "(hook guessed)".
 - **Fixing a hook.** Open the editor, pick the song, set the right time, and add `hook=m:ss` to its line in `songs.txt`.
 

@@ -13,6 +13,7 @@ import random
 import re
 import time
 import unicodedata
+import urllib.parse
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -454,25 +455,88 @@ def youtube_details(video_id: str) -> dict:
     return info or {}
 
 
+def youtube_music_search(query: str, count: int = 5) -> list[dict]:
+    """Search the "Songs" section of YouTube Music: official studio tracks, which
+    start at 0:00 like on Spotify (music videos often have intros)."""
+    url = f"https://music.youtube.com/search?q={urllib.parse.quote_plus(query)}#songs"
+    with _ydl({"extract_flat": "in_playlist", "playlistend": count}) as ydl:
+        info = ydl.extract_info(url, download=False)
+    return [e for e in (info or {}).get("entries") or [] if e and e.get("id")][:count]
+
+
+# "Remastered" is the same recording, so it is allowed; these are other recordings.
+_VERSION_WORDS = _BAD_WORDS + ("demo", "version", "edit", "mix")
+
+
+def music_title_ok(found: str, title: str) -> bool:
+    """True when a YouTube Music title is the song itself, not a live/remix/demo version."""
+    got, want = norm(found), norm(title)
+    if not got:
+        return False
+    if got == want:
+        return True
+    words = set(got.split())
+    want_words = [w for w in want.split() if w not in _STOP_WORDS] or want.split()
+    if not all(w in words for w in want_words):
+        return False
+    for bad in _VERSION_WORDS:
+        pattern = rf"\b{re.escape(bad)}\b"
+        if re.search(pattern, got) and not re.search(pattern, want):
+            return False
+    return True
+
+
+def artist_matches(info: dict, artist: str) -> bool:
+    """True when the video's artists, channel or title name the wanted artist."""
+    want = norm(artist)
+    if not want:
+        return True
+    artists = [a for a in (info.get("artists") or []) if a]
+    names = artists + [" & ".join(artists), info.get("artist"), info.get("creator"),
+                       info.get("channel"), info.get("uploader"), info.get("title")]
+    compact_want = want.replace(" ", "")
+    for name in names:
+        got = norm(name or "")
+        if not got:
+            continue
+        if len(compact_want) < 4:  # short names like "U2" or "MØ" must match a whole word
+            if want in got.split() or compact_want == got.replace(" ", ""):
+                return True
+        elif compact_want in got.replace(" ", ""):
+            return True
+    return False
+
+
 def today() -> str:
     return _dt.date.today().isoformat()
+
+
+def is_track(rec: dict | None) -> bool:
+    """True for an official studio track (YouTube Music / "Artist - Topic" channel)."""
+    rec = rec or {}
+    return bool(rec.get("track") or (rec.get("channel") or "").lower().endswith(" - topic"))
 
 
 class Resolver:
     """Finds a playable YouTube video for each song and caches the result.
 
+    It tries the official studio track from YouTube Music first (starts at 0:00,
+    same recording as on Spotify) and falls back to a normal YouTube search.
+
     Cache record (data/yt_cache.json, keyed by song_key):
-      yt, ytTitle, channel, duration, views, candidates[], detailed,
-      embeddable, hook (from heatmap or None), checked (date)
+      yt, ytTitle, channel, duration, views, candidates[], detailed, track
+      (True for a YouTube Music studio track), embeddable, hook (from the
+      heatmap or None), checked, upgraded (dates)
     """
 
     def __init__(self, cache_path: Path = CACHE_JSON, offline: bool = False,
-                 delay: float = 1.5, search=None, details=None, sleep=None):
+                 delay: float = 1.5, search=None, details=None, sleep=None, music_search=None):
         self.cache_path = cache_path
         self.offline = offline
         self.delay = delay
         self._search = search or youtube_search
         self._details = details or youtube_details
+        self._music_search = music_search or youtube_music_search
         self._sleep = sleep or time.sleep
         self._calls = 0
         self.cache: dict[str, dict] = {}
@@ -495,41 +559,93 @@ class Resolver:
             self._sleep(self.delay * random.uniform(0.7, 1.3))
         self._calls += 1
 
+    def needs_upgrade(self, key: str) -> bool:
+        """A cached music video (not a studio track) that --upgrade should look at again."""
+        rec = self.cache.get(key)
+        return bool(rec and rec.get("detailed") and not is_track(rec) and not rec.get("upgraded"))
+
     def lookup(self, artist: str, title: str, duration: float | None = None,
-               detail: bool = True, video_id: str | None = None) -> tuple[dict | None, str]:
-        """Returns (record, status). status is 'cache', 'new', 'offline' or an error text."""
+               detail: bool = True, video_id: str | None = None,
+               upgrade: bool = False) -> tuple[dict | None, str]:
+        """Returns (record, status).
+
+        status is 'cache', 'new', 'offline', 'kept (...)' or an error text.
+        detail=False only runs the normal search (used to rank liked songs by views).
+        upgrade=True looks again for songs whose cached video is not a studio track,
+        keeping the old video when nothing better is found.
+        """
         key = song_key(artist, title)
         rec = self.cache.get(key)
         if rec and video_id and rec.get("yt") != video_id:
             rec = None  # a manual yt= override replaces whatever was cached
-        if rec and (rec.get("detailed") or not detail):
+        upgrading = upgrade and detail and not video_id and self.needs_upgrade(key)
+        if rec and not upgrading and (rec.get("detailed") or not detail):
             return rec, "cache"
         if self.offline:
             return rec, "offline"
+        old = rec if rec and rec.get("detailed") else None
 
         try:
-            if rec is None:
+            if not detail:
+                new = self._web_record(artist, title, duration)
+                if new is None:
+                    return None, "no matching video found"
+            else:
                 if video_id:
-                    rec = {"candidates": [{"id": video_id}], "yt": video_id}
+                    candidates = [{"id": video_id, "source": "manual"}]
                 else:
-                    rec = self._search_record(artist, title, duration)
-                    if rec is None:
+                    candidates = self._music_candidates(artist, title)
+                    # When upgrading, the old video is the fallback, so skip its old candidates.
+                    earlier = [] if upgrading else [
+                        {k: v for k, v in c.items() if k != "error"}  # try old candidates again
+                        for c in (rec or {}).get("candidates") or []
+                        if c.get("id") not in {m["id"] for m in candidates}]
+                    candidates += earlier
+                new = self._detail_candidates(candidates, artist, title)
+                if new is None and not video_id and not upgrading and not (rec or {}).get("candidates"):
+                    web = self._web_record(artist, title, duration)
+                    if web is None and not candidates:
                         return None, "no matching video found"
-            if detail:
-                ok = self._detail_record(rec)
-                if not ok:
-                    self.cache[key] = rec
-                    self.save()
+                    if web is not None:
+                        # Keep the rejected studio tracks in the list, so the cache shows why.
+                        new = self._detail_candidates(candidates + web["candidates"], artist, title)
+                if new is None:
+                    if old:
+                        old["upgraded"] = today()
+                        self.cache[key] = old
+                        self.save()
+                        return old, "kept (no better video found)"
+                    if rec is not None:
+                        rec["candidates"] = candidates
+                        self.cache[key] = rec
+                        self.save()
                     return None, "no embeddable video found"
         except Exception as err:  # yt-dlp raises many different errors
-            return rec, f"lookup failed: {str(err).splitlines()[0][:160]}"
+            return old or rec, f"lookup failed: {str(err).splitlines()[0][:160]}"
 
-        rec["checked"] = today()
-        self.cache[key] = rec
+        # A studio track often has no "Most replayed" graph. If the earlier video
+        # is the same length, it is the same audio, so its hook still fits.
+        if (old and new.get("detailed") and new.get("hook") is None and old.get("hook") is not None
+                and new.get("duration") and old.get("duration")
+                and abs(float(new["duration"]) - float(old["duration"])) <= 3):
+            new["hook"] = old["hook"]
+            new["hookFrom"] = old.get("yt")
+        if upgrading:
+            new["upgraded"] = today()
+        new["checked"] = today()
+        self.cache[key] = new
         self.save()
-        return rec, "new"
+        return new, "new"
 
-    def _search_record(self, artist: str, title: str, duration: float | None) -> dict | None:
+    def _music_candidates(self, artist: str, title: str) -> list[dict]:
+        self._pause()
+        found = []
+        for item in self._music_search(f"{artist} {title}"):
+            if music_title_ok(item.get("title") or "", title):
+                found.append({"id": item["id"], "title": item.get("title"), "source": "music"})
+        return found[:3]
+
+    def _web_record(self, artist: str, title: str, duration: float | None) -> dict | None:
         results: dict[str, dict] = {}
         for query in (f"{artist} - {title} audio", f"{artist} {title}"):
             self._pause()
@@ -560,14 +676,18 @@ class Resolver:
                     "duration": e.get("duration"),
                     "views": e.get("view_count"),
                     "score": round(score_candidate(e, artist, title, duration), 2),
+                    "source": "web",
                 }
                 for e in scored
             ],
             "detailed": False,
         }
 
-    def _detail_record(self, rec: dict) -> bool:
-        for cand in rec.get("candidates") or [{"id": rec.get("yt")}]:
+    def _detail_candidates(self, candidates: list[dict], artist: str, title: str) -> dict | None:
+        """Full lookup of each candidate until one can be embedded. Returns a record or None."""
+        for cand in candidates:
+            if cand.get("error"):
+                continue  # already tried in this lookup
             self._pause()
             try:
                 info = self._details(cand["id"])
@@ -580,17 +700,28 @@ class Resolver:
             if info.get("availability") not in (None, "public", "unlisted"):
                 cand["error"] = f"availability: {info.get('availability')}"
                 continue
+            if cand.get("source") == "music":
+                if not artist_matches(info, artist):
+                    cand["error"] = "different artist"
+                    continue
+                if not music_title_ok(info.get("track") or info.get("title") or "", title):
+                    cand["error"] = "different version"
+                    continue
+            channel = info.get("channel") or info.get("uploader") or cand.get("channel")
+            description = (info.get("description") or "").strip()
             duration = info.get("duration") or cand.get("duration")
-            rec.update({
+            return {
                 "yt": cand["id"],
                 "ytTitle": info.get("title") or cand.get("title"),
-                "channel": info.get("channel") or info.get("uploader") or cand.get("channel"),
+                "channel": channel,
                 "duration": duration,
                 "views": info.get("view_count") or cand.get("views"),
                 "embeddable": info.get("playable_in_embed"),
                 "hook": hook_from_heatmap(info.get("heatmap"), duration),
+                "track": (cand.get("source") == "music"
+                          or (channel or "").lower().endswith(" - topic")
+                          or description.endswith("Auto-generated by YouTube.")),
+                "candidates": candidates,
                 "detailed": True,
-            })
-            return True
-        rec["detailed"] = False
-        return False
+            }
+        return None
