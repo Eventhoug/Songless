@@ -14,6 +14,7 @@ const MOCK = params.has('mock');
 const SONGS_URL = songsUrlFromParams(params);
 const TIMELINE_SECONDS = CLIP_STEPS[CLIP_STEPS.length - 1];
 const PRELOAD_COUNT = 2; // songs loaded in the background after the current one
+const SUGGESTION_LIMIT = 16; // songs shown in the search list
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -264,9 +265,10 @@ function renderFooter() {
 // ---------------------------------------------------------------- suggestions
 
 function updateSuggestions() {
-  state.suggestions = searchSongs(state.catalog, els.input.value, 8);
+  state.suggestions = searchSongs(state.catalog, els.input.value, SUGGESTION_LIMIT);
   state.highlighted = state.suggestions.length ? 0 : -1;
   renderSuggestions();
+  els.suggestions.scrollTop = 0;
 }
 
 function renderSuggestions() {
@@ -289,6 +291,29 @@ function renderSuggestions() {
   });
   if (state.highlighted >= 0) els.input.setAttribute('aria-activedescendant', `suggestion-${state.highlighted}`);
   else els.input.removeAttribute('aria-activedescendant');
+}
+
+// Arrow keys: move the highlight without redrawing the list, so it keeps its scroll position.
+function setHighlighted(index) {
+  state.highlighted = index;
+  [...els.suggestions.children].forEach((li, i) => {
+    li.classList.toggle('highlighted', i === index);
+    li.setAttribute('aria-selected', String(i === index));
+  });
+  els.input.setAttribute('aria-activedescendant', `suggestion-${index}`);
+  scrollToHighlighted();
+}
+
+// Scroll the list (never the page) so the highlighted song is in view.
+function scrollToHighlighted() {
+  const list = els.suggestions;
+  const item = list.children[state.highlighted];
+  if (!item) return;
+  const last = state.highlighted === list.children.length - 1;
+  const top = state.highlighted === 0 ? 0 : item.offsetTop;
+  const bottom = last ? list.scrollHeight : item.offsetTop + item.offsetHeight;
+  if (top < list.scrollTop) list.scrollTop = top;
+  else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
 }
 
 function closeSuggestions() {
@@ -561,12 +586,10 @@ function bindEvents() {
     const count = state.suggestions.length;
     if (event.key === 'ArrowDown' && count) {
       event.preventDefault();
-      state.highlighted = (state.highlighted + 1) % count;
-      renderSuggestions();
+      setHighlighted((state.highlighted + 1) % count);
     } else if (event.key === 'ArrowUp' && count) {
       event.preventDefault();
-      state.highlighted = (state.highlighted - 1 + count) % count;
-      renderSuggestions();
+      setHighlighted((state.highlighted - 1 + count) % count);
     } else if (event.key === 'Enter') {
       event.preventDefault();
       guessHighlighted();
