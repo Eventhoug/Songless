@@ -4,103 +4,146 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Songless Infinite</title>
-  <meta name="description" content="Guess the song from a tiny clip. Endless rounds, start or hook mode, rock, pop and hip-hop filters.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23151a2e'/%3E%3Cpath d='M9 17V7l9-2v10' fill='none' stroke='%23f5b83d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='%23f5b83d'/%3E%3Ccircle cx='16' cy='15' r='2' fill='%23f5b83d'/%3E%3C/svg%3E">
+  <meta name="description" content="Guess the song from a tiny clip. Endless rounds, start or hook mode, rock, pop and hip hop filters.">
+  <meta name="theme-color" content="#1b1c1e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231b1c1e'/%3E%3Cpath d='M9 17V7l9-2v10' fill='none' stroke='%2352b820' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='%2352b820'/%3E%3Ccircle cx='16' cy='15' r='2' fill='%2352b820'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <a class="brand" href="./">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17V7l9-2v10"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="15" r="2"/></svg>
-        <span>Songless</span><span class="tag">Infinite</span>
-      </a>
-      <div class="stats" aria-live="polite">
-        <div class="stat"><span class="stat-value" id="stat-score">0</span><span class="stat-label">Score</span></div>
-        <div class="stat"><span class="stat-value" id="stat-streak">0</span><span class="stat-label">Streak</span></div>
-        <div class="stat"><span class="stat-value" id="stat-best">0</span><span class="stat-label">Best</span></div>
-      </div>
-    </header>
+  <header class="topbar">
+    <div class="topbar-side left">
+      <button type="button" class="icon-btn plain" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="menu" id="menu" hidden>
+        <a href="editor.html">Add or fix a song</a>
+        <button type="button" data-open="help-dialog">How to play</button>
+        <button type="button" data-open="stats-dialog">Stats</button>
+        <button type="button" data-open="settings-dialog">Settings</button>
+      </nav>
+    </div>
 
-    <section class="controls" aria-label="Game settings">
-      <div class="segmented" role="group" aria-label="Where the clip starts" id="mode-buttons">
-        <button type="button" data-mode="start">Start of song</button>
-        <button type="button" data-mode="hook">Main hook</button>
-      </div>
-      <div class="chips" role="group" aria-label="Genre" id="genre-buttons"></div>
-    </section>
+    <a class="logo" href="./">Songless</a>
 
-    <section class="card notice" id="loading">
+    <div class="topbar-side right">
+      <button type="button" class="icon-btn" data-open="help-dialog" aria-label="How to play">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.2 9.2a2.9 2.9 0 1 1 3.9 2.7c-.7.3-1.1.9-1.1 1.6v.8"/><circle class="dot" cx="12" cy="17.6" r=".6"/></svg>
+      </button>
+      <button type="button" class="icon-btn" data-open="stats-dialog" aria-label="Stats">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19v-6M12 19V6M18 19v-9"/></svg>
+      </button>
+      <button type="button" class="icon-btn" data-open="settings-dialog" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+      <span class="streak-mini" aria-live="polite">Streak <b id="stat-streak">0</b> · Best <b id="stat-best">0</b></span>
+    </div>
+  </header>
+
+  <main class="app">
+    <div class="tabs" role="group" aria-label="Genre" id="genre-buttons"></div>
+    <div class="tabs small" role="group" aria-label="Where the clip starts" id="mode-buttons">
+      <button type="button" data-mode="start">Start of song</button>
+      <button type="button" data-mode="hook">Main hook</button>
+    </div>
+
+    <section class="notice" id="loading">
       <p>Loading songs...</p>
     </section>
 
-    <section class="card notice" id="empty" hidden>
+    <section class="notice" id="empty" hidden>
       <h2 id="empty-title">No playable songs yet</h2>
       <div id="empty-body"></div>
     </section>
 
-    <main class="card game" id="game" hidden>
-      <div class="video-frame" id="video-frame">
-        <div id="player"></div>
-        <div class="cover" id="cover">
-          <div class="eq" id="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-          <p class="cover-title" id="cover-title">Song 1</p>
-          <p class="cover-sub" id="cover-sub"></p>
-        </div>
-      </div>
-
+    <section class="game" id="game" hidden>
       <ol class="attempts" id="attempts" aria-label="Your guesses"></ol>
 
       <div class="timeline-wrap">
-        <div class="timeline" id="timeline" aria-hidden="true">
-          <div class="unlocked" id="unlocked"></div>
-          <div class="progress" id="progress"></div>
+        <div class="timeline-label-row">
+          <span class="clip-label" id="clip-label">0.5 seconds</span>
         </div>
-        <div class="timeline-labels">
-          <span>0:00</span>
-          <span id="clip-label">0.5 s unlocked</span>
-          <span>16 s</span>
-        </div>
+        <div class="marker-row" aria-hidden="true"><span class="marker" id="marker"></span></div>
+        <div class="timeline" id="timeline" aria-hidden="true"></div>
       </div>
 
       <div class="play-row">
         <button type="button" class="play" id="play-btn" aria-label="Play clip">
-          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="icon-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
+          <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10.5-6.5z"/></svg>
+          <svg class="icon-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg>
         </button>
       </div>
 
       <div class="guess-area" id="guess-area">
-        <div class="guess-box">
-          <input id="guess-input" type="text" placeholder="Know it? Search for the title or artist" autocomplete="off" spellcheck="false"
-                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions">
-          <ul id="suggestions" role="listbox" hidden></ul>
-        </div>
-        <div class="guess-buttons">
-          <button type="button" class="secondary" id="skip-btn">Skip (+0.5 s)</button>
-          <button type="button" class="primary" id="submit-btn">Submit</button>
+        <div class="guess-row">
+          <div class="search">
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+            <input id="guess-input" type="text" placeholder="Search a song" autocomplete="off" spellcheck="false"
+                   role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions">
+            <ul id="suggestions" role="listbox" hidden></ul>
+          </div>
+          <button type="button" class="skip-button" id="skip-btn">Skip</button>
         </div>
         <button type="button" class="link" id="giveup-btn">Give up</button>
       </div>
 
-      <div class="reveal" id="reveal" hidden>
-        <p class="reveal-result" id="reveal-result"></p>
-        <h2 class="reveal-title" id="reveal-title"></h2>
-        <p class="reveal-artist" id="reveal-artist"></p>
-        <p class="reveal-points" id="reveal-points"></p>
-        <button type="button" class="primary big" id="next-btn">Next song</button>
+      <!-- Always rendered (never display:none) so the YouTube player keeps working;
+           hidden behind the page with .offscreen while you are guessing. -->
+      <div class="reveal offscreen" id="reveal" aria-hidden="true" inert>
+        <div class="reveal-card">
+          <div class="video-frame"><div id="player"></div></div>
+          <div class="reveal-info">
+            <p class="reveal-result" id="reveal-result"></p>
+            <h2 class="reveal-title" id="reveal-title"></h2>
+            <p class="reveal-artist" id="reveal-artist"></p>
+            <p class="reveal-points" id="reveal-points"></p>
+          </div>
+        </div>
+        <button type="button" class="next" id="next-btn">Next song</button>
       </div>
-    </main>
+    </section>
 
     <footer class="footer">
       <span id="song-count"></span>
-      <label class="volume">Volume <input type="range" id="volume" min="0" max="100" step="1"></label>
-      <a href="editor.html">Add or fix a song</a>
-      <button type="button" class="link" id="reset-stats">Reset stats</button>
     </footer>
+  </main>
 
-    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-  </div>
+  <dialog class="dialog" id="help-dialog" aria-labelledby="help-title">
+    <form method="dialog"><button class="dialog-close" aria-label="Close">&times;</button></form>
+    <h2 id="help-title">How to play</h2>
+    <ol class="help-list">
+      <li>Press play and listen to the clip. It starts at <b>0.5 seconds</b>.</li>
+      <li>Search for the song and pick it from the list to guess.</li>
+      <li>A wrong guess or <b>Skip</b> unlocks a longer clip: 0.5, 1, 2, 4, 8 and 16 seconds.</li>
+      <li>You have 6 tries. A wrong guess by the right artist turns yellow.</li>
+      <li><b>Start of song</b> plays from the beginning, <b>Main hook</b> from the chorus or riff.</li>
+    </ol>
+    <p class="muted">Points: 6 for the first try, 5 for the second, and so on. The songs never end.</p>
+  </dialog>
+
+  <dialog class="dialog" id="stats-dialog" aria-labelledby="stats-title">
+    <form method="dialog"><button class="dialog-close" aria-label="Close">&times;</button></form>
+    <h2 id="stats-title">Stats</h2>
+    <p class="muted" id="stats-scope"></p>
+    <div class="stat-grid">
+      <div><span class="stat-num" id="stat-score">0</span><span class="stat-name">Score</span></div>
+      <div><span class="stat-num" id="stat-played">0</span><span class="stat-name">Played</span></div>
+      <div><span class="stat-num" id="stat-winrate">0%</span><span class="stat-name">Guessed</span></div>
+      <div><span class="stat-num" id="stat-best-2">0</span><span class="stat-name">Best streak</span></div>
+    </div>
+  </dialog>
+
+  <dialog class="dialog" id="settings-dialog" aria-labelledby="settings-title">
+    <form method="dialog"><button class="dialog-close" aria-label="Close">&times;</button></form>
+    <h2 id="settings-title">Settings</h2>
+    <label class="setting">Volume <input type="range" id="volume" min="0" max="100" step="1"></label>
+    <div class="setting-buttons">
+      <a class="btn-secondary" href="editor.html">Add or fix a song</a>
+      <button type="button" class="btn-secondary danger" id="reset-stats">Reset stats</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>

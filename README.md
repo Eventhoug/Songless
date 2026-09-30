@@ -73,10 +73,13 @@ If you'd rather use GitHub Pages: **Settings, Pages**, then "Deploy from a branc
 ## 4. Play
 
 ### Controls
-1. Press the big play button, or Space.
-2. Type part of a title or artist and pick the song from the list with the mouse, or with the arrow keys and Enter.
-3. **Skip** unlocks the next, longer clip.
-4. After the answer is shown, press **Next song**, or Enter.
+1. **Choose what to play.** Pick a genre in the tabs under the logo (All, Rock, Pop, Hip Hop), and *Start of song* or *Main hook* in the small toggle below them.
+2. **Listen.** Press the big green play button, or Space.
+3. **Guess.** Search for a title or artist and pick the song from the list: clicking it, or pressing Enter on the highlighted one, is your guess.
+4. **Skip** unlocks the next, longer clip.
+5. **Next song.** After the answer is shown, press **Next song**, or Enter.
+
+The icons at the top right open *How to play*, *Stats* and *Settings* (volume, reset stats). The menu at the top left links to the song editor.
 
 ### Testing on your own computer
 The game has to be opened through a web server, not by double-clicking `index.html`:
@@ -142,6 +145,7 @@ js/game.js                  game rules (clip steps, scoring, shuffle, search)
 js/player.js                YouTube clip player (+ a test player)
 js/songs.js, js/storage.js  loading songs, saving in the browser
 css/style.css               styling
+fonts/                      Outfit font (SIL Open Font License)
 data/songs.txt              the song list you edit
 data/songs.json             generated; what the game plays
 data/yt_cache.json          generated; YouTube lookups

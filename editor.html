@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Songless Editor</title>
   <meta name="description" content="Add a song to Songless or fix where its hook starts.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23151a2e'/%3E%3Cpath d='M9 17V7l9-2v10' fill='none' stroke='%23f5b83d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='%23f5b83d'/%3E%3Ccircle cx='16' cy='15' r='2' fill='%23f5b83d'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%231b1c1e'/%3E%3Cpath d='M9 17V7l9-2v10' fill='none' stroke='%2352b820' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='%2352b820'/%3E%3Ccircle cx='16' cy='15' r='2' fill='%2352b820'/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/outfit-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
   <script type="module" src="js/editor.js"></script>
 </head>
 <body class="editor">
+  <header class="topbar">
+    <div class="topbar-side left">
+      <a class="back-link" href="./">&larr; Back to the game</a>
+    </div>
+    <a class="logo" href="./">Songless</a>
+    <div class="topbar-side right"><span class="tag">Editor</span></div>
+  </header>
   <div class="app">
-    <header class="topbar">
-      <a class="brand" href="./">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17V7l9-2v10"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="15" r="2"/></svg>
-        <span>Songless</span><span class="tag">Editor</span>
-      </a>
-      <a href="./">Back to the game</a>
-    </header>
 
     <section class="card">
       <h1>Add or fix a song</h1>
