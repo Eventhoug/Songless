@@ -6,6 +6,16 @@ import { formatSeconds, slugify } from './game.js';
 
 const CUSTOM_KEY = 'customSongs.v1';
 const BROKEN_KEY = 'brokenVideos.v1';
+export const DEFAULT_SONGS_URL = 'data/songs.json';
+
+// The ?songs= parameter (used by the tests) may only point at a .json file on
+// this same site, so a shared link cannot load someone else's song list.
+export function songsUrlFromParams(params) {
+  const value = (params.get('songs') || '').trim();
+  const safe = /^[A-Za-z0-9_][A-Za-z0-9_./-]*\.json$/.test(value)
+    && !value.split('/').includes('..');
+  return safe ? value : DEFAULT_SONGS_URL;
+}
 
 export async function loadSongList(url = 'data/songs.json') {
   const response = await fetch(url, { cache: 'no-cache' });

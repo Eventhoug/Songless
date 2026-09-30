@@ -1,16 +1,17 @@
 import {
   CLIP_STEPS, MAX_ATTEMPTS, GENRE_FILTERS, Round, ShuffleBag, applyResult, emptyStats,
-  filterByGenre, formatClip, searchSongs, statsKey,
+  filterByGenre, searchSongs, statsKey,
 } from './game.js';
 import {
   getBrokenVideos, getCustomSongs, loadSongList, markBroken, mergeSongs, playableSongs,
+  songsUrlFromParams,
 } from './songs.js';
 import { MockClipPlayer, YouTubeClipPlayer } from './player.js';
 import { load, save } from './storage.js';
 
 const params = new URLSearchParams(window.location.search);
 const MOCK = params.has('mock');
-const SONGS_URL = params.get('songs') || 'data/songs.json';
+const SONGS_URL = songsUrlFromParams(params);
 const TIMELINE_SECONDS = CLIP_STEPS[CLIP_STEPS.length - 1];
 
 const $ = (id) => document.getElementById(id);
@@ -22,24 +23,24 @@ const els = {
   game: $('game'),
   modeButtons: $('mode-buttons'),
   genreButtons: $('genre-buttons'),
+  menuBtn: $('menu-btn'),
+  menu: $('menu'),
   statScore: $('stat-score'),
   statStreak: $('stat-streak'),
   statBest: $('stat-best'),
-  cover: $('cover'),
-  coverTitle: $('cover-title'),
-  coverSub: $('cover-sub'),
-  eq: $('eq'),
+  statBest2: $('stat-best-2'),
+  statPlayed: $('stat-played'),
+  statWinrate: $('stat-winrate'),
+  statsScope: $('stats-scope'),
   attempts: $('attempts'),
   timeline: $('timeline'),
-  unlocked: $('unlocked'),
-  progress: $('progress'),
+  marker: $('marker'),
   clipLabel: $('clip-label'),
   playBtn: $('play-btn'),
   guessArea: $('guess-area'),
   input: $('guess-input'),
   suggestions: $('suggestions'),
   skipBtn: $('skip-btn'),
-  submitBtn: $('submit-btn'),
   giveUpBtn: $('giveup-btn'),
   reveal: $('reveal'),
   revealResult: $('reveal-result'),
@@ -74,7 +75,7 @@ const state = {
   playToken: 0,
   suggestions: [],
   highlighted: -1,
-  selected: null,
+  segments: [], // timeline segments: { start, length, fill }
 };
 
 // ---------------------------------------------------------------- helpers
@@ -106,12 +107,28 @@ function el(tag, className, text) {
   return node;
 }
 
+function svgIcon(kind) {
+  const paths = {
+    wrong: '<path d="M6 6l12 12M18 6 6 18"/>',
+    artist: '<path d="M6 6l12 12M18 6 6 18"/>',
+    skip: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+    correct: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  };
+  const span = el('span', 'attempt-icon');
+  span.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind]}</svg>`;
+  return span;
+}
+
 function genreLabel(id) {
   return (GENRE_FILTERS.find((g) => g.id === id) || GENRE_FILTERS[0]).label;
 }
 
 function modeLabel(mode) {
   return mode === 'hook' ? 'Main hook' : 'Start of song';
+}
+
+function secondsText(seconds) {
+  return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
 }
 
 // ---------------------------------------------------------------- rendering
@@ -134,6 +151,10 @@ function renderStats() {
   els.statScore.textContent = String(stats.score);
   els.statStreak.textContent = String(stats.streak);
   els.statBest.textContent = String(stats.best);
+  els.statBest2.textContent = String(stats.best);
+  els.statPlayed.textContent = String(stats.played);
+  els.statWinrate.textContent = stats.played ? `${Math.round((stats.won / stats.played) * 100)}%` : '0%';
+  els.statsScope.textContent = `${modeLabel(settings.mode)} · ${genreLabel(settings.genre)}`;
 }
 
 function renderAttempts() {
@@ -144,42 +165,58 @@ function renderAttempts() {
     const li = el('li', 'attempt');
     if (attempt) {
       li.classList.add(attempt.type);
-      const labels = { wrong: 'Wrong', artist: 'Right artist', skip: 'Skipped', correct: 'Correct' };
       const text = attempt.guess ? `${attempt.guess.artist} - ${attempt.guess.title}` : 'Skipped';
-      li.append(el('span', 'attempt-text', text), el('span', 'attempt-tag', labels[attempt.type]));
-    } else {
-      if (round && !round.finished && i === round.attempts.length) li.classList.add('current');
-      li.append(el('span', 'attempt-text', ''), el('span', 'attempt-tag', formatClip(CLIP_STEPS[i])));
+      li.append(svgIcon(attempt.type), el('span', 'attempt-text', text));
+      if (attempt.type === 'artist') li.append(el('span', 'attempt-tag', 'Right artist'));
+    } else if (round && !round.finished && i === round.attempts.length) {
+      li.classList.add('current');
     }
     els.attempts.append(li);
   }
 }
 
+function buildTimeline() {
+  els.timeline.replaceChildren();
+  state.segments = [];
+  let previous = 0;
+  for (const step of CLIP_STEPS) {
+    const seg = el('span', 'segment');
+    const fill = el('span', 'segment-fill');
+    seg.style.flexGrow = String(step - previous);
+    seg.append(fill);
+    els.timeline.append(seg);
+    state.segments.push({ start: previous, length: step - previous, seg, fill });
+    previous = step;
+  }
+}
+
 function renderTimeline() {
   const round = state.round;
-  const unlockedSeconds = round ? (round.finished ? TIMELINE_SECONDS : round.clipLength) : CLIP_STEPS[0];
-  els.unlocked.style.width = `${(unlockedSeconds / TIMELINE_SECONDS) * 100}%`;
-  if (!els.timeline.querySelector('.marker')) {
-    for (const step of CLIP_STEPS.slice(0, -1)) {
-      const marker = el('span', 'marker');
-      marker.style.left = `${(step / TIMELINE_SECONDS) * 100}%`;
-      els.timeline.append(marker);
-    }
+  const unlocked = round ? (round.finished ? TIMELINE_SECONDS : round.clipLength) : CLIP_STEPS[0];
+  for (const segment of state.segments) {
+    segment.seg.classList.toggle('unlocked', segment.start < unlocked);
   }
-  els.clipLabel.textContent = round && round.finished ? 'Full song' : `${formatClip(unlockedSeconds)} unlocked`;
+  const position = (unlocked / TIMELINE_SECONDS) * 100;
+  els.marker.style.left = `${position}%`;
+  els.clipLabel.style.left = `${position}%`;
+  // Slide the label from left-aligned (start of the bar) to right-aligned (end).
+  els.clipLabel.style.transform = `translateX(-${position}%)`;
+  els.clipLabel.textContent = secondsText(unlocked);
 }
 
 function setProgress(seconds) {
-  els.progress.style.width = `${Math.min(seconds / TIMELINE_SECONDS, 1) * 100}%`;
+  for (const segment of state.segments) {
+    const part = Math.min(Math.max((seconds - segment.start) / segment.length, 0), 1);
+    segment.fill.style.width = `${part * 100}%`;
+  }
 }
 
 function renderButtons() {
   const round = state.round;
   const next = round ? round.nextClipLength : null;
-  els.skipBtn.textContent = next ? `Skip (+${formatClip(next - round.clipLength)})` : 'Skip (last try)';
+  els.skipBtn.setAttribute('aria-label', next ? `Skip (+${next - round.clipLength} s)` : 'Skip');
   els.playBtn.classList.toggle('is-playing', state.playing);
-  els.playBtn.setAttribute('aria-label', state.playing ? 'Stop' : `Play ${formatClip(round ? round.clipLength : CLIP_STEPS[0])}`);
-  els.eq.classList.toggle('active', state.playing);
+  els.playBtn.setAttribute('aria-label', state.playing ? 'Stop' : `Play ${secondsText(round ? round.clipLength : CLIP_STEPS[0])}`);
 }
 
 function renderRound() {
@@ -209,10 +246,23 @@ function showEmpty(title, paragraphs) {
   showPanel('empty');
 }
 
+function setRevealVisible(visible) {
+  els.reveal.classList.toggle('offscreen', !visible);
+  els.reveal.setAttribute('aria-hidden', String(!visible));
+  els.reveal.inert = !visible;
+  els.guessArea.hidden = visible;
+  els.playBtn.parentElement.hidden = visible;
+}
+
+function renderFooter() {
+  const count = state.pool.length;
+  const genre = settings.genre === 'all' ? '' : ` ${genreLabel(settings.genre).toLowerCase()}`;
+  els.songCount.textContent = `${count}${genre} songs`;
+}
+
 // ---------------------------------------------------------------- suggestions
 
 function updateSuggestions() {
-  state.selected = null;
   state.suggestions = searchSongs(state.catalog, els.input.value, 8);
   state.highlighted = state.suggestions.length ? 0 : -1;
   renderSuggestions();
@@ -232,21 +282,12 @@ function renderSuggestions() {
     li.append(el('span', 's-title', song.title), el('span', 's-artist', song.artist));
     li.addEventListener('mousedown', (event) => {
       event.preventDefault();
-      chooseSuggestion(index);
+      guess(song);
     });
     list.append(li);
   });
   if (state.highlighted >= 0) els.input.setAttribute('aria-activedescendant', `suggestion-${state.highlighted}`);
   else els.input.removeAttribute('aria-activedescendant');
-}
-
-function chooseSuggestion(index) {
-  const song = state.suggestions[index];
-  if (!song) return;
-  state.selected = song;
-  els.input.value = `${song.artist} - ${song.title}`;
-  state.suggestions = [];
-  renderSuggestions();
 }
 
 function closeSuggestions() {
@@ -259,10 +300,7 @@ function closeSuggestions() {
 function rebuildPool() {
   state.pool = filterByGenre(state.catalog, settings.genre);
   state.bag = new ShuffleBag(state.pool);
-  const label = genreLabel(settings.genre);
-  els.songCount.textContent = settings.genre === 'all'
-    ? `${state.pool.length} songs`
-    : `${state.pool.length} ${label.toLowerCase()} songs`;
+  renderFooter();
 }
 
 function recordAbandonedRound() {
@@ -296,14 +334,8 @@ function nextRound() {
   state.round = new Round(song, settings.mode);
   state.roundNo += 1;
 
-  els.cover.classList.remove('hidden');
-  els.coverTitle.textContent = `Song ${state.roundNo}`;
-  els.coverSub.textContent = `${modeLabel(settings.mode)} · ${genreLabel(settings.genre)}`;
-  els.reveal.hidden = true;
-  els.guessArea.hidden = false;
-  els.playBtn.hidden = false;
+  setRevealVisible(false);
   els.input.value = '';
-  state.selected = null;
   setProgress(0);
   renderRound();
   renderStats();
@@ -338,24 +370,24 @@ async function togglePlay() {
   setTimeout(() => { if (!state.playing && state.round === round) setProgress(0); }, 600);
 }
 
-function submitGuess() {
+// Picking a song from the list is the guess, like in the original Songless.
+function guess(song) {
   const round = state.round;
-  if (!round || round.finished) return;
-  let song = state.selected;
-  if (!song && state.suggestions.length) {
-    song = state.suggestions[Math.max(state.highlighted, 0)];
-  }
-  if (!song) {
-    toast(els.input.value.trim() ? 'Pick a song from the list.' : 'Type a title or artist, then pick a song from the list.');
-    return;
-  }
+  if (!round || round.finished || !song) return;
   stopPlayback();
   const result = round.guess(song);
   els.input.value = '';
-  state.selected = null;
   closeSuggestions();
   if (result === 'artist' && !round.finished) toast('Right artist, wrong song!');
   afterAttempt();
+}
+
+function guessHighlighted() {
+  if (state.suggestions.length) {
+    guess(state.suggestions[Math.max(state.highlighted, 0)]);
+  } else {
+    toast(els.input.value.trim() ? 'No song matches that. Try another word.' : 'Type a title or artist, then pick a song from the list.');
+  }
 }
 
 function skip() {
@@ -403,15 +435,13 @@ function finishRound() {
     ? `+${round.points} points · streak ${streak}`
     : 'Streak reset';
 
-  els.cover.classList.add('hidden');
-  els.guessArea.hidden = true;
-  els.playBtn.hidden = true;
-  els.reveal.hidden = false;
+  setRevealVisible(true);
   setProgress(0);
   state.loadPromise.then(() => {
     if (state.round === round) state.player.playFrom(round.startTime);
   });
-  els.nextBtn.focus();
+  els.nextBtn.focus({ preventScroll: true });
+  els.reveal.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 function setMode(mode) {
@@ -444,11 +474,28 @@ function handlePlayerError(code, videoId) {
   state.catalog = state.catalog.filter((s) => !broken(s));
   state.pool = state.pool.filter((s) => !broken(s));
   if (brokenSong && state.bag) state.bag.remove(brokenSong);
+  renderFooter();
   if (state.round && state.round.song.yt === videoId && !state.round.finished) {
     toast('That video cannot be played here, so it was skipped.');
     state.roundNo -= 1;
     nextRound();
   }
+}
+
+// ---------------------------------------------------------------- menu and dialogs
+
+function setMenu(open) {
+  els.menu.hidden = !open;
+  els.menuBtn.setAttribute('aria-expanded', String(open));
+}
+
+function openDialog(id) {
+  const dialog = $(id);
+  if (!dialog) return;
+  setMenu(false);
+  if (id === 'stats-dialog') renderStats();
+  if (typeof dialog.showModal === 'function') dialog.showModal();
+  else dialog.setAttribute('open', '');
 }
 
 // ---------------------------------------------------------------- events
@@ -463,10 +510,22 @@ function bindEvents() {
     if (btn) setGenre(btn.dataset.genre);
   });
   els.playBtn.addEventListener('click', togglePlay);
-  els.submitBtn.addEventListener('click', submitGuess);
   els.skipBtn.addEventListener('click', skip);
   els.giveUpBtn.addEventListener('click', giveUp);
   els.nextBtn.addEventListener('click', nextRound);
+
+  els.menuBtn.addEventListener('click', () => setMenu(els.menu.hidden));
+  document.addEventListener('click', (event) => {
+    if (!els.menu.hidden && !event.target.closest('#menu, #menu-btn')) setMenu(false);
+    const opener = event.target.closest('[data-open]');
+    if (opener) openDialog(opener.dataset.open);
+  });
+  for (const dialog of document.querySelectorAll('dialog')) {
+    // Click on the dark backdrop closes the dialog.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
 
   els.input.addEventListener('input', updateSuggestions);
   els.input.addEventListener('focus', renderSuggestions);
@@ -483,20 +542,22 @@ function bindEvents() {
       renderSuggestions();
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      submitGuess();
+      guessHighlighted();
     } else if (event.key === 'Escape') {
       closeSuggestions();
     }
   });
 
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setMenu(false);
     const typing = event.target instanceof HTMLInputElement && event.target.type === 'text';
-    if (typing || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (typing || event.ctrlKey || event.metaKey || event.altKey || document.querySelector('dialog[open]')) return;
+    const revealed = !els.reveal.classList.contains('offscreen');
     if (event.key === ' ' && state.round && !state.round.finished && !els.game.hidden) {
       if (event.target instanceof HTMLButtonElement) return; // let buttons handle Space
       event.preventDefault();
       togglePlay();
-    } else if (event.key === 'Enter' && !els.reveal.hidden && event.target === document.body) {
+    } else if (event.key === 'Enter' && revealed && event.target === document.body) {
       event.preventDefault();
       nextRound();
     }
@@ -520,7 +581,7 @@ function bindEvents() {
 
 function buildGenreButtons() {
   for (const genre of GENRE_FILTERS) {
-    const btn = el('button', 'chip', genre.label);
+    const btn = el('button', '', genre.label);
     btn.type = 'button';
     btn.dataset.genre = genre.id;
     els.genreButtons.append(btn);
@@ -533,6 +594,7 @@ async function start() {
   if (!['start', 'hook'].includes(settings.mode)) settings.mode = 'start';
   if (!GENRE_FILTERS.some((g) => g.id === settings.genre)) settings.genre = 'all';
   buildGenreButtons();
+  buildTimeline();
   renderControls();
   renderStats();
   bindEvents();
@@ -541,7 +603,7 @@ async function start() {
     showEmpty('Open the game through a web server', [
       'Browsers do not let the game load its song list from a file. In the Songless folder run:',
       ['python -m http.server 8000'],
-      'and open http://localhost:8000 . Or use the GitHub Pages link.',
+      'and open http://localhost:8000 . Or use the website link (Vercel).',
     ]);
     return;
   }
@@ -560,11 +622,13 @@ async function start() {
       `The song list has ${songs.length} songs, but none of them has a YouTube video yet.`,
       'On your computer, in the Songless folder, run:',
       ['pip install -r tools/requirements.txt', 'python tools/build_songs.py'],
-      'Then reload this page. See README.md for details. You can also add a single song in the editor (link at the bottom).',
+      'Then commit and push data/songs.json and data/yt_cache.json. The website updates by itself after a push (on your own computer, just reload). See README.md for details. You can also add a single song in the editor (menu at the top left).',
     ]);
     return;
   }
 
+  // The player must be in a rendered (not display:none) part of the page when it starts.
+  showPanel('game');
   const PlayerClass = MOCK ? MockClipPlayer : YouTubeClipPlayer;
   const failIds = (params.get('mockFail') || '').split(',').filter(Boolean);
   state.player = new PlayerClass($('player'), { onError: handlePlayerError, failIds });

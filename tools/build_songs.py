@@ -9,6 +9,11 @@ cached in data/yt_cache.json, so only new songs are looked up next time.
     python tools/build_songs.py --offline        # no internet: only cache + overrides
     python tools/build_songs.py --refresh "Radiohead - Creep"
     python tools/build_songs.py --limit 50       # look up at most 50 new songs this run
+    python tools/build_songs.py --upgrade        # swap music videos for studio tracks
+
+Each song first gets the official studio track from YouTube Music (it starts at
+0:00 like on Spotify); if there is none that can be embedded, a normal YouTube
+search picks the best official video or audio upload.
 """
 
 from __future__ import annotations
@@ -80,24 +85,28 @@ def build(args: argparse.Namespace, resolver: Resolver | None = None) -> int:
         cached = resolver.cache.get(entry.key)
         needs_network = not (cached and cached.get("detailed")
                              and (not entry.yt or cached.get("yt") == entry.yt))
+        if args.upgrade and not entry.yt and resolver.needs_upgrade(entry.key):
+            needs_network = True
         if needs_network and not args.offline and args.limit is not None and new_lookups >= args.limit:
             rec, status = cached, "not looked up yet (--limit reached)"
             limited += 1
         else:
             try:
-                rec, status = resolver.lookup(entry.artist, entry.title, video_id=entry.yt)
+                rec, status = resolver.lookup(entry.artist, entry.title, video_id=entry.yt,
+                                              upgrade=args.upgrade)
             except KeyboardInterrupt:
                 interrupted = True
                 print("\nStopped. Writing what we have so far (the cache is saved).")
                 break
-            if status == "new":
+            if status == "new" or status.startswith("kept"):
                 new_lookups += 1
         song = build_song(entry, rec)
         songs.append(song)
 
         if status == "new":
             hook_text = f"hook {format_time(song['hook'])} ({song['hookSource']})"
-            print(f"[{index}/{total}] {label}: {song['yt']} {hook_text}")
+            kind = "studio track" if songlib.is_track(rec) else "video"
+            print(f"[{index}/{total}] {label}: {song['yt']} {kind}, {hook_text}")
         elif status not in ("cache", "offline") and not status.startswith("not looked up"):
             print(f"[{index}/{total}] {label}: {status}")
         if not song["yt"]:
@@ -117,8 +126,12 @@ def build(args: argparse.Namespace, resolver: Resolver | None = None) -> int:
     Path(args.out).write_text(dump_songs_json(payload), encoding="utf-8")
     write_report(Path(args.report), problems, failures, estimates)
 
+    tracks = sum(1 for e in entries[:len(songs)] if songlib.is_track(resolver.cache.get(e.key)))
     print()
-    print(f"Wrote {args.out}: {len(songs)} songs, {playable} playable.")
+    print(f"Wrote {args.out}: {len(songs)} songs, {playable} playable, {tracks} studio tracks.")
+    if not args.upgrade and playable - tracks > 0 and not args.offline:
+        print(f"{playable - tracks} songs use a music video. "
+              "Run with --upgrade to look for studio tracks instead.")
     if args.offline and playable < len(songs):
         print(f"{len(songs) - playable} songs have no YouTube video yet. "
               "Run without --offline to look them up.")
@@ -165,6 +178,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--refresh", action="append", metavar="'ARTIST - TITLE'",
                         help="look this song up again (can be repeated)")
     parser.add_argument("--refresh-all", action="store_true", help="look every song up again")
+    parser.add_argument("--upgrade", action="store_true",
+                        help="look again for songs that use a music video instead of a studio "
+                             "track; keeps the old video if nothing better is found")
     parser.add_argument("--limit", type=int, default=None,
                         help="look up at most this many new songs in this run")
     parser.add_argument("--delay", type=float, default=1.5,

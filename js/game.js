@@ -9,7 +9,7 @@ export const GENRE_FILTERS = [
   { id: 'all', label: 'All' },
   { id: 'rock', label: 'Rock' },
   { id: 'pop', label: 'Pop' },
-  { id: 'hiphop', label: 'Hip-hop' },
+  { id: 'hiphop', label: 'Hip Hop' },
 ];
 
 export function normalize(text) {
