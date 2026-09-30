@@ -188,6 +188,27 @@ class ScoreTests(unittest.TestCase):
         ok = candidate("oasis000001", "Live Forever (Remastered)", "Oasis - Topic", 276)
         self.assertGreater(songlib.score_candidate(ok, "Oasis", "Live Forever", 276), 2)
 
+    def test_other_artist_version_is_penalised(self):
+        dolly = {"title": "Dolly Parton - Wrecking Ball (feat. Miley Cyrus) (Official Audio) ft. Miley Cyrus",
+                 "channel": "Dolly Parton", "view_count": 1_228_194}
+        miley = {"title": "Miley Cyrus - Wrecking Ball (Audio)", "channel": "MILEY", "view_count": 27_546_677}
+        self.assertGreater(songlib.score_candidate(miley, "Miley Cyrus", "Wrecking Ball"),
+                           songlib.score_candidate(dolly, "Miley Cyrus", "Wrecking Ball") + 2)
+
+    def test_other_recording_is_penalised(self):
+        remake = {"title": "Sunday Bloody Sunday (Stories Of Surrender Version) (Official Audio)",
+                  "channel": "U2", "view_count": 65_973}
+        original = {"title": "Sunday Bloody Sunday", "channel": "U2", "view_count": 463_949}
+        self.assertGreater(songlib.score_candidate(original, "U2", "Sunday Bloody Sunday"),
+                           songlib.score_candidate(remake, "U2", "Sunday Bloody Sunday") + 2)
+
+    def test_original_version_is_fine(self):
+        original = {"title": "California Love (Original Version)", "channel": "2Pac", "view_count": 88_367_624}
+        full = {"title": "2Pac ft. Dr. Dre - California Love (Official Video) [Full Length Version]",
+                "channel": "UPROXX", "view_count": 118_238_540}
+        self.assertGreater(songlib.score_candidate(original, "2Pac", "California Love"),
+                           songlib.score_candidate(full, "2Pac", "California Love"))
+
     def test_wrong_duration_is_penalised(self):
         right = candidate("right000001", "Dreams", "Fleetwood Mac - Topic", 257)
         long = candidate("long0000001", "Dreams", "Fleetwood Mac - Topic", 3600)
@@ -298,6 +319,8 @@ class MusicMatchTests(unittest.TestCase):
         self.assertFalse(songlib.music_title_ok("Flowers (Demo)", "Flowers"))
         self.assertFalse(songlib.music_title_ok("Counting Stars (2023 Version)", "Counting Stars"))
         self.assertFalse(songlib.music_title_ok("Karma Police", "Creep"))
+        self.assertFalse(songlib.music_title_ok("one dance (speed)", "One Dance"))
+        self.assertTrue(songlib.music_title_ok("Speed of Sound", "Speed of Sound"))
         self.assertTrue(songlib.music_title_ok("Live Forever", "Live Forever"))
 
     def test_artist_matches(self):
@@ -339,6 +362,20 @@ class MusicResolverTests(unittest.TestCase):
         self.assertEqual(fake.searches, [])  # no normal YouTube search needed
         self.assertEqual(fake.detail_calls, ["track000001"])  # the live version was never tried
 
+    def test_exact_title_is_tried_first(self):
+        fake = FakeYouTube(
+            {},
+            {"remaster001": {"playable_in_embed": True, "duration": 174, "artists": ["Drake"]},
+             "onedance001": {"playable_in_embed": True, "duration": 174, "artists": ["Drake"],
+                             "track": "One Dance"}},
+            music={"One Dance": [{"id": "speedup0001", "title": "one dance (speed)"},
+                                 {"id": "remaster001", "title": "One Dance (Remastered)"},
+                                 {"id": "onedance001", "title": "One Dance"}]},
+        )
+        rec, _ = self.resolver(fake).lookup("Drake", "One Dance")
+        self.assertEqual(rec["yt"], "onedance001")
+        self.assertEqual(fake.detail_calls, ["onedance001"])
+
     def test_wrong_artist_falls_back_to_video(self):
         fake = FakeYouTube(
             {"Creep": [candidate("video000001", "Radiohead - Creep (Official Audio)", "Radiohead", 237)]},
@@ -376,10 +413,20 @@ class MusicResolverTests(unittest.TestCase):
         resolver = self.resolver(fake)
         rec, status = resolver.lookup("Radiohead", "Creep", upgrade=True)
         self.assertEqual((status, rec["yt"]), ("kept (no better video found)", "video000001"))
+        self.assertEqual(rec["upgradeTried"], [])
         self.assertEqual(fake.searches, [])
         self.assertFalse(resolver.needs_upgrade("radiohead - creep"))
         rec, status = resolver.lookup("Radiohead", "Creep", upgrade=True)
         self.assertEqual(status, "cache")
+
+    def test_upgrade_remembers_rejected_tracks(self):
+        self.upgrade_cache()
+        fake = FakeYouTube({}, {"cover000001": {"playable_in_embed": True, "artists": ["Cover Band"]}},
+                           music={"Creep": [{"id": "cover000001", "title": "Creep"}]})
+        rec, status = self.resolver(fake).lookup("Radiohead", "Creep", upgrade=True)
+        self.assertEqual(status, "kept (no better video found)")
+        self.assertEqual(rec["upgradeTried"],
+                         [{"id": "cover000001", "title": "Creep", "error": "different artist"}])
 
     def test_upgrade_different_length_does_not_copy_hook(self):
         self.upgrade_cache()

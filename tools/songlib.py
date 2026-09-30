@@ -369,6 +369,7 @@ _BAD_WORDS = (
     "nightcore", "reaction", "lesson", "tutorial", "8d", "1 hour", "10 hours",
     "bass boosted", "reverb", "piano", "drum", "tribute", "concert", "full album",
     "extended", "acoustic", "unplugged", "loop", "mashup", "parody", "reacts",
+    "speed", "sped", "tiktok", "daycore",
 )
 _STOP_WORDS = {"a", "an", "and", "of", "the", "to", "in", "on", "feat", "ft"}
 
@@ -397,6 +398,8 @@ def score_candidate(entry: dict, artist: str, title: str, duration: float | None
         score += 2
     elif want_artist.replace(" ", "") and want_artist.replace(" ", "") in channel.replace(" ", ""):
         score += 2
+    if want_artist and channel.replace(" ", "") == want_artist.replace(" ", ""):
+        score += 1  # the artist's own channel, not a re-upload
 
     if "official audio" in video_title:
         score += 2
@@ -410,6 +413,22 @@ def score_candidate(entry: dict, artist: str, title: str, duration: float | None
                 rf"\b{re.escape(bad)}\b", want_title):
             score -= 6
             break
+
+    # Another recording: "(Stories Of Surrender Version)", "(Demo)", "(Radio Edit)" ...
+    # "Original Version" is the normal recording, so it is not punished.
+    without_original = re.sub(r"\boriginal (version|mix)\b", "", video_title)
+    for word in ("version", "demo", "edit", "mix"):
+        if re.search(rf"\b{word}\b", without_original) and not re.search(rf"\b{word}\b", want_title):
+            score -= 4
+            break
+
+    # "Dolly Parton - Wrecking Ball (feat. Miley Cyrus)" is another artist's recording.
+    raw_title = entry.get("title") or ""
+    if " - " in raw_title and want_artist:
+        lead, rest = (norm(p) for p in raw_title.split(" - ", 1))
+        if (want_artist not in lead and want_artist.replace(" ", "") not in lead.replace(" ", "")
+                and want_title not in lead and want_title in rest):
+            score -= 4
 
     length = entry.get("duration")
     if length:
@@ -612,6 +631,11 @@ class Resolver:
                 if new is None:
                     if old:
                         old["upgraded"] = today()
+                        if upgrading:
+                            # Keep what was tried and why, so it is easy to see later.
+                            old["upgradeTried"] = [
+                                {k: c.get(k) for k in ("id", "title", "error") if c.get(k)}
+                                for c in candidates]
                         self.cache[key] = old
                         self.save()
                         return old, "kept (no better video found)"
@@ -643,6 +667,9 @@ class Resolver:
         for item in self._music_search(f"{artist} {title}"):
             if music_title_ok(item.get("title") or "", title):
                 found.append({"id": item["id"], "title": item.get("title"), "source": "music"})
+        # The exact title first: "One Dance" before "One Dance (Remastered)".
+        want = norm(title)
+        found.sort(key=lambda c: norm(c["title"] or "") != want)
         return found[:3]
 
     def _web_record(self, artist: str, title: str, duration: float | None) -> dict | None:
