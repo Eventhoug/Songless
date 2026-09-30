@@ -1,0 +1,4 @@
+{"version": 1, "count": 2, "playable": 0, "songs": [
+  {"id": "a-one", "title": "One", "artist": "A", "genres": ["rock"], "yt": null, "duration": null, "start": 0, "hook": 45, "hookSource": "estimate", "source": "list"},
+  {"id": "a-two", "title": "Two", "artist": "A", "genres": ["pop"], "yt": null, "duration": null, "start": 0, "hook": 45, "hookSource": "estimate", "source": "list"}
+]}

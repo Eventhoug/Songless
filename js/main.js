@@ -1,18 +1,19 @@
 import {
-  CLIP_STEPS, MAX_ATTEMPTS, GENRE_FILTERS, Round, ShuffleBag, applyResult, emptyStats,
+  CLIP_STEPS, MAX_ATTEMPTS, GENRE_FILTERS, Round, ShuffleBag, applyResult, clipStart, emptyStats,
   filterByGenre, searchSongs, statsKey,
 } from './game.js';
 import {
   getBrokenVideos, getCustomSongs, loadSongList, markBroken, mergeSongs, playableSongs,
   songsUrlFromParams,
 } from './songs.js';
-import { MockClipPlayer, YouTubeClipPlayer } from './player.js';
+import { MockClipPlayer, PlayerPool, YouTubeClipPlayer } from './player.js';
 import { load, save } from './storage.js';
 
 const params = new URLSearchParams(window.location.search);
 const MOCK = params.has('mock');
 const SONGS_URL = songsUrlFromParams(params);
 const TIMELINE_SECONDS = CLIP_STEPS[CLIP_STEPS.length - 1];
+const PRELOAD_COUNT = 2; // songs loaded in the background after the current one
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -340,7 +341,12 @@ function nextRound() {
   renderRound();
   renderStats();
 
-  state.loadPromise = state.player.load(song.yt, state.round.startTime);
+  const upcoming = state.bag.peek(PRELOAD_COUNT);
+  state.player.keep([song.yt, ...upcoming.map((s) => s.yt)]);
+  state.loadPromise = state.player.activate(song.yt, state.round.startTime);
+  const round = state.round;
+  // Load the next songs once the current one is ready, so they do not slow it down.
+  state.loadPromise.then(() => { if (state.round === round) preloadUpcoming(); });
   if (window.matchMedia('(pointer: fine)').matches) els.input.focus({ preventScroll: true });
 }
 
@@ -465,6 +471,17 @@ function setGenre(genre) {
   nextRound();
 }
 
+// Load the next songs in the background (muted), so pressing play starts right away.
+function preloadUpcoming() {
+  if (!state.bag || !state.round) return;
+  const upcoming = state.bag.peek(PRELOAD_COUNT);
+  state.player.keep([state.round.song.yt, ...upcoming.map((s) => s.yt)]);
+  upcoming.reduce(
+    (previous, song) => previous.then(() => state.player.prepare(song.yt, clipStart(song, settings.mode))),
+    Promise.resolve(),
+  );
+}
+
 function handlePlayerError(code, videoId) {
   if (!videoId) return;
   console.warn(`Songless: YouTube error ${code} for video ${videoId}. Skipping it on this device.`);
@@ -479,6 +496,8 @@ function handlePlayerError(code, videoId) {
     toast('That video cannot be played here, so it was skipped.');
     state.roundNo -= 1;
     nextRound();
+  } else {
+    preloadUpcoming(); // a song that was loading in the background failed: load another
   }
 }
 
@@ -631,7 +650,11 @@ async function start() {
   showPanel('game');
   const PlayerClass = MOCK ? MockClipPlayer : YouTubeClipPlayer;
   const failIds = (params.get('mockFail') || '').split(',').filter(Boolean);
-  state.player = new PlayerClass($('player'), { onError: handlePlayerError, failIds });
+  state.player = new PlayerPool($('player-frame'), {
+    size: 1 + PRELOAD_COUNT,
+    createPlayer: (element, onError) => new PlayerClass(element, { onError, failIds }),
+    onError: handlePlayerError,
+  });
   try {
     await state.player.init();
   } catch (error) {

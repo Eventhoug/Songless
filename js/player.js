@@ -1,8 +1,10 @@
-// Clip players. Both classes have the same interface:
-//   init(), load(videoId, start), playClip(start, seconds, onProgress),
-//   playFrom(start), stop(), setVolume(0-100), getCurrentTime(), isReady
+// Clip players. YouTubeClipPlayer and MockClipPlayer have the same interface:
+//   init(), load(videoId, start), seekIdle(start), playClip(start, seconds, onProgress),
+//   playFrom(start), stop(), setActive(bool), setVolume(0-100), getCurrentTime(), isReady
+// PlayerPool keeps several of them so the next songs are already loaded.
 
 const STATE = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
+const PREPARE_TIMEOUT_MS = 8000;
 
 let apiPromise = null;
 
@@ -26,14 +28,20 @@ export function loadYouTubeApi() {
   return apiPromise;
 }
 
-// Plays exact clips from a hidden (covered) YouTube player.
+// Plays exact clips from a hidden YouTube player.
 //
 // Clip length is measured with a local timer that only runs while YouTube
 // reports PLAYING, so time spent buffering is not counted.
+//
+// No sound in the background: in the game (controls off) the player stays muted
+// unless a clip or the answer is playing on purpose, and if the video starts
+// playing by itself (for example a slow load that finishes after the timeout)
+// it is paused straight away.
 export class YouTubeClipPlayer {
   constructor(element, { controls = false, onError = () => {}, onState = () => {} } = {}) {
     this.element = element;
     this.controls = controls;
+    this.silent = !controls; // the editor shows YouTube's own controls, so it needs sound
     this.onError = onError;
     this.onState = onState;
     this.player = null;
@@ -42,6 +50,7 @@ export class YouTubeClipPlayer {
     this.clip = null;
     this.preparing = null;
     this.timer = null;
+    this.wantsSound = false; // true while a clip or the answer plays on purpose
     this.state = STATE.UNSTARTED;
   }
 
@@ -67,21 +76,23 @@ export class YouTubeClipPlayer {
         },
       });
     });
+    if (this.silent) this.player.mute();
     this.isReady = true;
   }
 
   // Cue a video and buffer it (muted) so the first clip starts quickly.
   load(videoId, start = 0) {
     this.stop();
+    this.resolvePrepare();
     this.videoId = videoId;
+    this.player.mute();
     this.player.cueVideoById({ videoId, startSeconds: start });
     return new Promise((resolve) => {
       this.preparing = { start, resolve, videoId };
-      this.player.mute();
       this.player.playVideo();
       setTimeout(() => {
         if (this.preparing && this.preparing.videoId === videoId) this.finishPrepare();
-      }, 6000);
+      }, PREPARE_TIMEOUT_MS);
     });
   }
 
@@ -92,24 +103,34 @@ export class YouTubeClipPlayer {
     try {
       this.player.pauseVideo();
       this.player.seekTo(prep.start, true);
-      this.player.unMute();
+      if (!this.silent) this.player.unMute();
     } catch {
       // player may be gone
     }
     prep.resolve();
   }
 
-  cancelPrepare() {
+  // End a pending load() promise without touching the sound.
+  resolvePrepare() {
     const prep = this.preparing;
     if (!prep) return;
     this.preparing = null;
-    this.player.unMute();
     prep.resolve();
+  }
+
+  // Move a loaded, paused video to another start point (e.g. after switching mode).
+  seekIdle(start) {
+    if (!this.isReady || this.clip || this.preparing) return;
+    try {
+      this.player.seekTo(start, true);
+    } catch {
+      // ignore
+    }
   }
 
   playClip(start, seconds, onProgress = () => {}) {
     this.stop();
-    this.cancelPrepare();
+    this.resolvePrepare();
     return new Promise((resolve) => {
       this.clip = {
         start,
@@ -120,6 +141,7 @@ export class YouTubeClipPlayer {
         resolve,
         onProgress,
       };
+      this.wantsSound = true;
       this.player.unMute();
       this.player.seekTo(start, true);
       this.player.playVideo();
@@ -129,7 +151,8 @@ export class YouTubeClipPlayer {
 
   playFrom(start) {
     this.stop();
-    this.cancelPrepare();
+    this.resolvePrepare();
+    this.wantsSound = true;
     this.player.unMute();
     this.player.seekTo(start, true);
     this.player.playVideo();
@@ -154,8 +177,8 @@ export class YouTubeClipPlayer {
     this.clip = null;
     clearInterval(this.timer);
     this.timer = null;
+    this.quiet();
     try {
-      this.player.pauseVideo();
       this.player.seekTo(clip.start, true);
     } catch {
       // ignore
@@ -163,15 +186,22 @@ export class YouTubeClipPlayer {
     clip.resolve(reason);
   }
 
+  // Pause, and mute again in the game.
+  quiet() {
+    this.wantsSound = false;
+    try {
+      this.player.pauseVideo();
+      if (this.silent) this.player.mute();
+    } catch {
+      // ignore
+    }
+  }
+
   stop() {
     if (this.clip) {
       this.finishClip('stopped');
     } else if (this.player && this.isReady) {
-      try {
-        this.player.pauseVideo();
-      } catch {
-        // ignore
-      }
+      this.quiet();
     }
   }
 
@@ -180,6 +210,11 @@ export class YouTubeClipPlayer {
     const now = performance.now();
     if (this.preparing && state === STATE.PLAYING) {
       this.finishPrepare();
+      return;
+    }
+    if (state === STATE.PLAYING && this.silent && !this.wantsSound) {
+      // Started without being asked (e.g. a slow load finished late): stop it.
+      this.quiet();
       return;
     }
     const clip = this.clip;
@@ -197,13 +232,13 @@ export class YouTubeClipPlayer {
 
   handleError(code) {
     const videoId = this.videoId;
-    if (this.preparing) {
-      const prep = this.preparing;
-      this.preparing = null;
-      prep.resolve();
-    }
+    this.resolvePrepare();
     this.finishClip('error');
     this.onError(code, videoId);
+  }
+
+  setActive() {
+    // Showing and hiding is done by PlayerPool.
   }
 
   setVolume(volume) {
@@ -216,6 +251,124 @@ export class YouTubeClipPlayer {
 
   getDuration() {
     return this.player && this.isReady ? this.player.getDuration() : 0;
+  }
+}
+
+// Several players stacked in one frame: the current song plus the next ones,
+// which load (muted) in the background so pressing play starts right away.
+export class PlayerPool {
+  constructor(frame, { size = 3, createPlayer, onError = () => {} }) {
+    this.frame = frame;
+    this.size = size;
+    this.createPlayer = createPlayer;
+    this.onError = onError;
+    this.entries = [];
+    this.active = null;
+    this.keepIds = new Set();
+    this.clock = 0;
+    this.isReady = false;
+  }
+
+  async init() {
+    for (let i = 0; i < this.size; i += 1) {
+      const slot = document.createElement('div');
+      slot.className = 'pool-slot';
+      const target = document.createElement('div');
+      slot.append(target);
+      this.frame.append(slot);
+      const entry = { slot, player: null, videoId: null, start: 0, ready: Promise.resolve(), used: 0 };
+      entry.player = this.createPlayer(target, (code, videoId) => this.handleError(entry, code, videoId));
+      this.entries.push(entry);
+    }
+    await Promise.all(this.entries.map((entry) => entry.player.init()));
+    this.isReady = true;
+  }
+
+  find(videoId) {
+    return this.entries.find((entry) => entry.videoId === videoId) || null;
+  }
+
+  // Songs that must stay loaded (the current one and the next ones).
+  keep(videoIds) {
+    this.keepIds = new Set(videoIds.filter(Boolean));
+  }
+
+  freeEntry() {
+    const free = this.entries.filter((e) => e !== this.active && !this.keepIds.has(e.videoId));
+    if (!free.length) return null;
+    return free.find((e) => !e.videoId) || free.reduce((a, b) => (a.used <= b.used ? a : b));
+  }
+
+  // Load a song in the background (muted). Returns a promise for when it is ready.
+  prepare(videoId, start = 0) {
+    if (!videoId) return Promise.resolve();
+    const found = this.find(videoId);
+    if (found) {
+      if (found.start !== start) {
+        found.start = start;
+        found.ready = found.ready.then(() => found.player.seekIdle(start));
+      }
+      return found.ready;
+    }
+    const entry = this.freeEntry();
+    if (!entry) return Promise.resolve();
+    entry.videoId = videoId;
+    entry.start = start;
+    entry.used = ++this.clock;
+    entry.ready = entry.player.load(videoId, start);
+    return entry.ready;
+  }
+
+  // Make this song the one that plays; uses the preloaded player when there is one.
+  activate(videoId, start = 0) {
+    if (this.active) this.active.player.stop();
+    if (!this.find(videoId)) {
+      this.keepIds.add(videoId);
+      const previous = this.active;
+      this.active = null; // the old song's player may be reused
+      this.prepare(videoId, start);
+      if (!this.find(videoId)) this.active = previous;
+    } else {
+      this.prepare(videoId, start); // moves it to the right start if needed
+    }
+    const entry = this.find(videoId);
+    if (!entry) return Promise.resolve();
+    this.active = entry;
+    entry.used = ++this.clock;
+    for (const e of this.entries) {
+      e.slot.classList.toggle('active', e === entry);
+      e.player.setActive(e === entry);
+    }
+    return entry.ready;
+  }
+
+  handleError(entry, code, videoId) {
+    if (entry.videoId === videoId && entry !== this.active) entry.videoId = null;
+    this.onError(code, videoId);
+  }
+
+  get player() {
+    return this.active ? this.active.player : null;
+  }
+
+  playClip(start, seconds, onProgress) {
+    return this.player ? this.player.playClip(start, seconds, onProgress) : Promise.resolve('stopped');
+  }
+
+  playFrom(start) {
+    if (this.player) this.player.playFrom(start);
+  }
+
+  stop() {
+    if (this.player) this.player.stop();
+  }
+
+  setVolume(volume) {
+    for (const entry of this.entries) entry.player.setVolume(volume);
+  }
+
+  getCurrentTime() {
+    return this.player ? this.player.getCurrentTime() : 0;
   }
 }
 
@@ -251,6 +404,15 @@ export class MockClipPlayer {
     if (this.failIds.has(videoId)) {
       setTimeout(() => this.onError(150, videoId), 50);
     }
+  }
+
+  seekIdle(start) {
+    this.position = start;
+    this.log.push({ type: 'seek', videoId: this.videoId, start });
+  }
+
+  setActive(active) {
+    if (active) this.log.push({ type: 'activate', videoId: this.videoId });
   }
 
   playClip(start, seconds, onProgress = () => {}) {
