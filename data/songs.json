@@ -1,4 +1,4 @@
-{"version": 1, "generated": "2026-09-30T18:27:27", "count": 792, "playable": 792, "songs": [
+{"version": 1, "generated": "2026-09-30T18:31:45", "count": 791, "playable": 791, "songs": [
   {"id": "radiohead-creep", "title": "Creep", "artist": "Radiohead", "genres": ["rock"], "yt": "9RfVp-GhKfs", "duration": 239, "start": 0, "hook": 56.0, "hookSource": "heatmap", "views": 218159179, "source": "list"},
   {"id": "radiohead-karma-police", "title": "Karma Police", "artist": "Radiohead", "genres": ["rock"], "yt": "nbCOAPR33ME", "duration": 261, "start": 0, "hook": 27.5, "hookSource": "heatmap", "views": 63186295, "source": "list"},
   {"id": "radiohead-no-surprises", "title": "No Surprises", "artist": "Radiohead", "genres": ["rock"], "yt": "7374CZQoS2Y", "duration": 228, "start": 0, "hook": 17.0, "hookSource": "heatmap", "views": 174259994, "source": "list"},
@@ -784,7 +784,6 @@
   {"id": "junior-senior-move-your-feet", "title": "Move Your Feet", "artist": "Junior Senior", "genres": ["pop"], "yt": "xI9NfAetZyk", "duration": 182, "start": 0, "hook": 13.0, "hookSource": "heatmap", "views": 37346014, "source": "list"},
   {"id": "outlandish-aicha", "title": "Aicha", "artist": "Outlandish", "genres": ["pop", "hiphop"], "yt": "5uO3ct_79zg", "duration": 276, "start": 0, "hook": 31.5, "hookSource": "heatmap", "views": 3435154, "source": "list"},
   {"id": "emmelie-de-forest-only-teardrops", "title": "Only Teardrops", "artist": "Emmelie de Forest", "genres": ["pop"], "yt": "m7JmRFiJip0", "duration": 181, "start": 0, "hook": 146.0, "hookSource": "heatmap", "views": 471498, "source": "list"},
-  {"id": "olsen-brothers-fly-on-the-wings-of-love", "title": "Fly on the Wings of Love", "artist": "Olsen Brothers", "genres": ["pop"], "yt": "JF8fkHK0AWs", "duration": 202, "start": 0, "hook": 150.0, "hookSource": "heatmap", "views": 434579, "source": "list"},
   {"id": "thomas-helmig-stupid-man", "title": "Stupid Man", "artist": "Thomas Helmig", "genres": ["pop", "rock"], "yt": "WO6sKoaFFbk", "duration": 207, "start": 0, "hook": 71.0, "hookSource": "heatmap", "views": 749420, "source": "list"},
   {"id": "christopher-cph-girls", "title": "CPH Girls", "artist": "Christopher", "genres": ["pop"], "yt": "gdfpLiF_lFY", "duration": 212, "start": 0, "hook": 60.0, "hookSource": "heatmap", "views": 107411, "source": "list"},
   {"id": "bob-marley-and-the-wailers-three-little-birds", "title": "Three Little Birds", "artist": "Bob Marley & The Wailers", "genres": ["other"], "yt": "MUNNRAdizz0", "duration": 180, "start": 0, "hook": 13.0, "hookSource": "heatmap", "views": 74589943, "source": "list"},
