@@ -2,48 +2,20 @@
  "2pac - california love": {
   "candidates": [
    {
-    "channel": "UPROXX",
-    "duration": 412,
-    "id": "omfz62qu_Bc",
-    "score": 5.42,
-    "title": "2Pac ft. Dr. Dre - California Love (Official Video) [Full Length Version]",
-    "views": 118238540
-   },
-   {
-    "channel": "2Pac",
-    "duration": 286,
     "id": "J7_bMdYfSws",
-    "score": 4.38,
-    "title": "California Love (Original Version)",
-    "views": 88367624
-   },
-   {
-    "channel": "wattana59",
-    "duration": 291,
-    "id": "uWbXQQG9B6c",
-    "score": 4.31,
-    "title": "2Pac - California Love [Original Version]",
-    "views": 49946328
-   },
-   {
-    "channel": "7clouds Rap",
-    "duration": 284,
-    "id": "RVuLwqdOPlo",
-    "score": 4.07,
-    "title": "2Pac - California Love (Lyrics) ft. Dr. Dre",
-    "views": 8170141
+    "source": "manual"
    }
   ],
-  "channel": "UPROXX",
+  "channel": "2Pac",
   "checked": "2026-09-30",
   "detailed": true,
-  "duration": 412,
+  "duration": 285,
   "embeddable": true,
-  "hook": 81.0,
-  "upgraded": "2026-09-30",
-  "views": 118238540,
-  "yt": "omfz62qu_Bc",
-  "ytTitle": "2Pac ft. Dr. Dre - California Love (Official Video) [Full Length Version]"
+  "hook": 136.0,
+  "track": true,
+  "views": 88369471,
+  "yt": "J7_bMdYfSws",
+  "ytTitle": "California Love (Original Version)"
  },
  "2pac - changes": {
   "candidates": [
@@ -984,48 +956,20 @@
  "backstreet boys - everybody backstreets back": {
   "candidates": [
    {
-    "channel": "Backstreet Boys",
-    "duration": 363,
-    "id": "6M6samPEMpM",
-    "score": 4.65,
-    "title": "Backstreet Boys - Everybody (Backstreet's Back) (Official HD Video)",
-    "views": 671915467
-   },
-   {
-    "channel": "7clouds",
-    "duration": 286,
-    "id": "e-syzbglE6g",
-    "score": 4.22,
-    "title": "Backstreet Boys - Everybody (Backstreet's Back) (Lyrics)",
-    "views": 24615512
-   },
-   {
-    "channel": "GoldenMusic",
-    "duration": 224,
-    "id": "eV7qXmqYs9E",
-    "score": 4.15,
-    "title": "Backstreet Boys - Everybody (Backstreet's Back) (Radio Edit) [Audio HQ]",
-    "views": 319838
-   },
-   {
-    "channel": "Backstreet Boys",
-    "duration": 225,
     "id": "xPsiB9GlgKQ",
-    "score": 4.04,
-    "title": "Everybody (Backstreet's Back) (Radio Edit)",
-    "views": 6506919
+    "source": "manual"
    }
   ],
   "channel": "Backstreet Boys",
   "checked": "2026-09-30",
   "detailed": true,
-  "duration": 362,
+  "duration": 225,
   "embeddable": true,
-  "hook": 158.0,
-  "upgraded": "2026-09-30",
-  "views": 671915467,
-  "yt": "6M6samPEMpM",
-  "ytTitle": "Backstreet Boys - Everybody (Backstreet's Back) (Official HD Video)"
+  "hook": 59.5,
+  "track": true,
+  "views": 6507060,
+  "yt": "xPsiB9GlgKQ",
+  "ytTitle": "Everybody (Backstreet's Back) (Radio Edit)"
  },
  "backstreet boys - i want it that way": {
   "candidates": [
@@ -3281,32 +3225,20 @@
  "drake - one dance": {
   "candidates": [
    {
-    "id": "ChUqVvlZVZM",
-    "source": "music",
-    "title": "one dance (speed)"
-   },
-   {
     "id": "4IbRT6Vfl_U",
-    "source": "music",
-    "title": "One Dance"
-   },
-   {
-    "id": "-m7ilVaZ7Zc",
-    "source": "music",
-    "title": "Drake One Dance"
+    "source": "manual"
    }
   ],
-  "channel": "xxxd1or",
+  "channel": "Drake - Topic",
   "checked": "2026-09-30",
   "detailed": true,
-  "duration": 118,
+  "duration": 227,
   "embeddable": true,
   "hook": null,
   "track": true,
-  "upgraded": "2026-09-30",
-  "views": 1239,
-  "yt": "ChUqVvlZVZM",
-  "ytTitle": "one dance (speed)"
+  "views": 29455,
+  "yt": "4IbRT6Vfl_U",
+  "ytTitle": "One Dance"
  },
  "drake - passionfruit": {
   "candidates": [
@@ -7286,48 +7218,20 @@
  "miley cyrus - wrecking ball": {
   "candidates": [
    {
-    "channel": "Dolly Parton",
-    "duration": 241,
-    "id": "nQMr3VV1u48",
-    "score": 5.83,
-    "title": "Dolly Parton - Wrecking Ball (feat. Miley Cyrus) (Official Audio) ft. Miley Cyrus",
-    "views": 1228194
-   },
-   {
-    "channel": "MILEY",
-    "duration": 222,
-    "id": "My2FRPA3Gf8",
-    "score": 5.73,
-    "title": "Miley Cyrus - Wrecking Ball (Official Video)",
-    "views": 1246458516
-   },
-   {
-    "channel": "MILEY",
-    "duration": 225,
     "id": "mRFHAvdwXXs",
-    "score": 4.73,
-    "title": "Miley Cyrus - Wrecking Ball (Audio)",
-    "views": 27546677
-   },
-   {
-    "channel": "7clouds",
-    "duration": 222,
-    "id": "AHtYLZu3ZQk",
-    "score": 4.27,
-    "title": "Miley Cyrus - Wrecking Ball (Lyrics)",
-    "views": 35933586
+    "source": "manual"
    }
   ],
-  "channel": "Dolly Parton",
+  "channel": "MILEY",
   "checked": "2026-09-30",
   "detailed": true,
-  "duration": 241,
+  "duration": 224,
   "embeddable": true,
-  "hook": 138.5,
-  "upgraded": "2026-09-30",
-  "views": 1228194,
-  "yt": "nQMr3VV1u48",
-  "ytTitle": "Dolly Parton - Wrecking Ball (feat. Miley Cyrus) (Official Audio) ft. Miley Cyrus"
+  "hook": 169.5,
+  "track": false,
+  "views": 27546707,
+  "yt": "mRFHAvdwXXs",
+  "ytTitle": "Miley Cyrus - Wrecking Ball (Audio)"
  },
  "mo - final song": {
   "candidates": [
@@ -10654,48 +10558,20 @@
  "u2 - sunday bloody sunday": {
   "candidates": [
    {
-    "channel": "U2",
-    "duration": 233,
-    "id": "FZTDe_MRYtU",
-    "score": 5.45,
-    "title": "Sunday Bloody Sunday (Stories Of Surrender Version) (Official Audio)",
-    "views": 65973
-   },
-   {
-    "channel": "Free Spirit",
-    "duration": 284,
-    "id": "SJLGeXWouE0",
-    "score": 4.01,
-    "title": "Sunday Bloody Sunday    |    The Best Of U2",
-    "views": 5184880
-   },
-   {
-    "channel": "U2",
-    "duration": 279,
-    "id": "zhMD7nt1LIg",
-    "score": 3.89,
-    "title": "U2 - Sunday Bloody Sunday (Lyric Video)",
-    "views": 2071838
-   },
-   {
-    "channel": "U2",
-    "duration": 280,
     "id": "ewLkmDG6DeM",
-    "score": 3.7,
-    "title": "Sunday Bloody Sunday",
-    "views": 463949
+    "source": "manual"
    }
   ],
   "channel": "U2",
   "checked": "2026-09-30",
   "detailed": true,
-  "duration": 233,
+  "duration": 280,
   "embeddable": true,
-  "hook": 168.5,
-  "upgraded": "2026-09-30",
-  "views": 65973,
-  "yt": "FZTDe_MRYtU",
-  "ytTitle": "Sunday Bloody Sunday (Stories Of Surrender Version) (Official Audio)"
+  "hook": 26.5,
+  "track": true,
+  "views": 463949,
+  "yt": "ewLkmDG6DeM",
+  "ytTitle": "Sunday Bloody Sunday"
  },
  "u2 - with or without you": {
   "candidates": [
