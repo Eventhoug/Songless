@@ -4,13 +4,14 @@ import {
 } from './game.js';
 import {
   getBrokenVideos, getCustomSongs, loadSongList, markBroken, mergeSongs, playableSongs,
+  songsUrlFromParams,
 } from './songs.js';
 import { MockClipPlayer, YouTubeClipPlayer } from './player.js';
 import { load, save } from './storage.js';
 
 const params = new URLSearchParams(window.location.search);
 const MOCK = params.has('mock');
-const SONGS_URL = params.get('songs') || 'data/songs.json';
+const SONGS_URL = songsUrlFromParams(params);
 const TIMELINE_SECONDS = CLIP_STEPS[CLIP_STEPS.length - 1];
 
 const $ = (id) => document.getElementById(id);
@@ -541,7 +542,7 @@ async function start() {
     showEmpty('Open the game through a web server', [
       'Browsers do not let the game load its song list from a file. In the Songless folder run:',
       ['python -m http.server 8000'],
-      'and open http://localhost:8000 . Or use the GitHub Pages link.',
+      'and open http://localhost:8000 . Or use the website link (Vercel).',
     ]);
     return;
   }
@@ -560,7 +561,7 @@ async function start() {
       `The song list has ${songs.length} songs, but none of them has a YouTube video yet.`,
       'On your computer, in the Songless folder, run:',
       ['pip install -r tools/requirements.txt', 'python tools/build_songs.py'],
-      'Then reload this page. See README.md for details. You can also add a single song in the editor (link at the bottom).',
+      'Then commit and push data/songs.json and data/yt_cache.json. The website updates by itself after a push (on your own computer, just reload). See README.md for details. You can also add a single song in the editor (link at the bottom).',
     ]);
     return;
   }

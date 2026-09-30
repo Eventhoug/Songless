@@ -51,8 +51,34 @@ Then commit and push `data/songs.json` and `data/yt_cache.json`.
 
 Try `--dry-run` first to see what would happen without changing anything.
 
-## 3. Play
+## 3. Put it online with Vercel (the link for your classmates)
 
+Vercel hosts the game as a normal website for free (Hobby plan, for personal non-commercial projects). It works with public and private repositories in your personal GitHub account (Vercel, n.d. a). There is nothing to build: `vercel.json` tells Vercel to serve the files as they are.
+
+1. **Fill the song list first** (section 1 and optionally section 2), then commit and push `data/songs.json` and `data/yt_cache.json`.
+2. **Merge the pull request into `main`.** On GitHub, go to **Settings, General, Default branch** and switch it to `main`.
+3. **Create the Vercel project:**
+   1. Go to https://vercel.com and sign up with **Continue with GitHub**.
+   2. Click **Add New, Project**, find `Songless` and click **Import**. If it is not listed, click "Adjust GitHub App Permissions" and give Vercel access to the repository.
+   3. Leave the settings as they are. The framework preset is "Other", with no build command. Click **Deploy**.
+4. **Share the link.** After about a minute you get a link like `https://songless-xxxx.vercel.app`, which you can send to the class. You can change the name under **Settings, Domains** in the Vercel project.
+
+### After setup
+- **Automatic updates.** Every push to `main` updates the website automatically, for example after adding songs and running `build_songs.py`.
+- **Preview links.** Every pull request gets its own preview link, so you can try changes before merging.
+- **Production branch.** Vercel uses `main` as the live branch when the repository has one (Vercel, n.d. b).
+
+If you'd rather use GitHub Pages: **Settings, Pages**, then "Deploy from a branch", `main`, `/ (root)`. Pages is free for public repositories only.
+
+## 4. Play
+
+### Controls
+1. Press the big play button, or Space.
+2. Type part of a title or artist and pick the song from the list with the mouse, or with the arrow keys and Enter.
+3. **Skip** unlocks the next, longer clip.
+4. After the answer is shown, press **Next song**, or Enter.
+
+### Testing on your own computer
 The game has to be opened through a web server, not by double-clicking `index.html`:
 
 ```bash
@@ -60,21 +86,6 @@ python -m http.server 8000
 ```
 
 Then open http://localhost:8000.
-
-### Controls
-
-1. Press the big play button, or Space.
-2. Type part of a title or artist and pick the song from the list with the mouse, or with the arrow keys and Enter.
-3. **Skip** unlocks the next, longer clip.
-4. After the answer is shown, press **Next song**, or Enter.
-
-## 4. Share it with your classmates (GitHub Pages)
-
-1. Merge this branch into `main` and push.
-2. On GitHub go to **Settings, Pages**. Under "Build and deployment" choose **Deploy from a branch**, then branch `main` and folder `/ (root)`, and save.
-3. After a minute the game is live at `https://<your-username>.github.io/<repo-name>/`. Send that link to the class.
-
-GitHub Pages is free for public repositories. A private repository needs a paid GitHub plan for Pages.
 
 ## 5. Add songs
 
@@ -136,6 +147,7 @@ data/songs.json             generated; what the game plays
 data/yt_cache.json          generated; YouTube lookups
 data/artist_genres.txt      artist -> genre for the Spotify import
 tools/                      build_songs.py, import_spotify.py, songlib.py
+vercel.json                 Vercel hosting settings (static site, no build)
 tests/                      Python and JavaScript tests
 ```
 
@@ -152,5 +164,7 @@ Add `?mock=1` to the game URL to play with a test beep instead of YouTube.
 
 - Headphonesty (2026) *Spotify Just Killed Thousands of Third-Party Music Apps*. Available at: https://www.headphonesty.com/2026/02/spotify-crackdown-thousands-third-party-music-apps/ (Accessed: 30 September 2026).
 - ramsayleung (2026) *Spotify Web API changes (February 2026), Issue #550, rspotify*. GitHub. Available at: https://github.com/ramsayleung/rspotify/issues/550 (Accessed: 30 September 2026).
+- Vercel (n.d. a) *Vercel Hobby Plan*. Available at: https://vercel.com/docs/plans/hobby (Accessed: 30 September 2026).
+- Vercel (n.d. b) *How to use a non-default branch for production deployments on Vercel*. Available at: https://vercel.com/kb/guide/can-i-use-a-non-default-branch-for-production (Accessed: 30 September 2026).
 - watsonbox (n.d.) *exportify: Export/Backup Spotify playlists using the Web API*. GitHub. Available at: https://github.com/watsonbox/exportify (Accessed: 30 September 2026).
 - yt-dlp (2026) *yt-dlp, version 2026.8.19* [computer program]. Available at: https://github.com/yt-dlp/yt-dlp (Accessed: 30 September 2026).

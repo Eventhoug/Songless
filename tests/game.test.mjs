@@ -6,7 +6,9 @@ import {
   CLIP_STEPS, MAX_ATTEMPTS, Round, ShuffleBag, applyResult, emptyStats, filterByGenre,
   formatSeconds, normalize, parseSeconds, sameSong, searchSongs, slugify,
 } from '../js/game.js';
-import { cleanSong, mergeSongs, playableSongs, songsTxtLine } from '../js/songs.js';
+import {
+  DEFAULT_SONGS_URL, cleanSong, mergeSongs, playableSongs, songsTxtLine, songsUrlFromParams,
+} from '../js/songs.js';
 
 const creep = { id: 'radiohead-creep', title: 'Creep', artist: 'Radiohead', genres: ['rock'], yt: 'aaaaaaaaaaa', start: 0, hook: 58.5 };
 const karma = { id: 'radiohead-karma-police', title: 'Karma Police', artist: 'Radiohead', genres: ['rock'], yt: 'bbbbbbbbbbb', start: 1, hook: 70 };
@@ -135,4 +137,14 @@ test('songs.txt line and song list helpers', () => {
   assert.equal(merged.length, 5);
   assert.equal(merged.find((s) => s.id === creep.id).hook, 10);
   assert.equal(playableSongs([...songs, { ...creep, id: 'x', yt: null }], new Set(['aaaaaaaaaaa'])).length, 4);
+});
+
+test('?songs= only accepts a .json file on the same site', () => {
+  const url = (value) => songsUrlFromParams(new URLSearchParams(value === null ? '' : `songs=${encodeURIComponent(value)}`));
+  assert.equal(url(null), DEFAULT_SONGS_URL);
+  assert.equal(url('tests/fixtures/songs.json'), 'tests/fixtures/songs.json');
+  for (const bad of ['https://evil.example/x.json', '//evil.example/x.json', '/etc/x.json', '../x.json',
+    'data/../../x.json', 'data/songs.txt', 'javascript:alert(1)//.json', '']) {
+    assert.equal(url(bad), DEFAULT_SONGS_URL, bad);
+  }
 });

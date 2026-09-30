@@ -1,12 +1,13 @@
 import { CLIP_STEPS, formatClip, formatSeconds, parseSeconds, slugify } from './game.js';
 import {
   clearBroken, deleteCustomSong, getCustomSongs, loadSongList, mergeSongs, saveCustomSong, songsTxtLine,
+  songsUrlFromParams,
 } from './songs.js';
 import { MockClipPlayer, YouTubeClipPlayer } from './player.js';
 
 const params = new URLSearchParams(window.location.search);
 const MOCK = params.has('mock');
-const SONGS_URL = params.get('songs') || 'data/songs.json';
+const SONGS_URL = songsUrlFromParams(params);
 
 const $ = (id) => document.getElementById(id);
 const els = {
