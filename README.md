@@ -8,7 +8,7 @@ A guess-the-song game for the class, inspired by Songless (lessgames.com/songles
 - **Endless.** Songs never repeat until every song in the filter has been played.
 - **Scoring.** 6 points for a first-try guess, 5 for the second try and so on. Score, streak and best streak are saved in your browser, separately for each mode and genre.
 - **Right-artist hint.** A wrong guess by the right artist is shown in yellow.
-- **Songs.** About 800 songs to start with: Radiohead, Dire Straits and blink-182 plus many other rock, pop and hip-hop artists, Danish songs and hits in other languages. Import your Spotify liked songs, or add songs one by one.
+- **Songs.** About 800 songs to start with: Radiohead, Dire Straits and blink-182 plus many other rock, pop and hip-hop artists, Danish artists singing in English, and hits in other languages. Import your Spotify liked songs, or add songs one by one.
 
 The game is plain HTML, CSS and JavaScript, with no build step. Music plays through a hidden YouTube player, which is the free option that can start anywhere in a song. The song tools are written in Python.
 
