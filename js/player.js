@@ -158,6 +158,13 @@ export class YouTubeClipPlayer {
     this.player.playVideo();
   }
 
+  // Let the clip that is playing now go on to a longer length (Skip while playing).
+  extendClip(seconds) {
+    if (!this.clip) return false;
+    this.clip.limitMs = Math.max(this.clip.limitMs, seconds * 1000);
+    return true;
+  }
+
   tick() {
     const clip = this.clip;
     if (!clip) return;
@@ -359,6 +366,10 @@ export class PlayerPool {
     if (this.player) this.player.playFrom(start);
   }
 
+  extendClip(seconds) {
+    return this.player ? this.player.extendClip(seconds) : false;
+  }
+
   stop() {
     if (this.player) this.player.stop();
   }
@@ -421,14 +432,25 @@ export class MockClipPlayer {
     this.beep(seconds);
     return new Promise((resolve) => {
       const began = performance.now();
-      this.clip = { resolve, start };
+      this.clip = { resolve, start, seconds };
       this.timer = setInterval(() => {
+        const limit = this.clip ? this.clip.seconds : seconds;
         const played = (performance.now() - began) / 1000;
-        this.position = start + Math.min(played, seconds);
-        onProgress(Math.min(played, seconds));
-        if (played >= seconds) this.finish('done');
+        this.position = start + Math.min(played, limit);
+        onProgress(Math.min(played, limit));
+        if (played >= limit) {
+          this.log.push({ type: 'clipEnd', videoId: this.videoId, played: Math.round(played * 1000) / 1000 });
+          this.finish('done');
+        }
       }, 15);
     });
+  }
+
+  extendClip(seconds) {
+    if (!this.clip) return false;
+    this.clip.seconds = Math.max(this.clip.seconds, seconds);
+    this.log.push({ type: 'extend', videoId: this.videoId, seconds });
+    return true;
   }
 
   playFrom(start) {

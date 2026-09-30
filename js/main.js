@@ -399,9 +399,17 @@ function guessHighlighted() {
 function skip() {
   const round = state.round;
   if (!round || round.finished) return;
-  stopPlayback();
   round.skip();
-  afterAttempt();
+  if (round.finished) {
+    stopPlayback();
+    finishRound();
+    return;
+  }
+  // While a clip is playing, Skip lets it play on to the new, longer length:
+  // the bar keeps going and only resets when the clip reaches its end.
+  // (A clip that is still loading picks up the new length when it starts.)
+  if (state.playing) state.player.extendClip(round.clipLength);
+  renderRound();
 }
 
 function giveUp() {
