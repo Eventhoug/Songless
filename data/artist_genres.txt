@@ -1,0 +1,209 @@
+# Artist -> genre, used by tools/import_spotify.py when the Spotify CSV has no
+# genre for a song. Artists already in songs.txt are recognised automatically,
+# so this list is only for extra artists. Format:  Artist | rock / pop / hiphop
+#
+# Add lines here if the import puts an artist under "other".
+
+# Rock
+The Black Keys | rock
+Queens of the Stone Age | rock
+Rage Against the Machine | rock
+System of a Down | rock
+Nickelback | rock
+Three Days Grace | rock
+Papa Roach | rock
+Evanescence | rock
+Bring Me The Horizon | rock
+Twenty One Pilots | rock
+The Neighbourhood | rock
+Cage The Elephant | rock
+Kaiser Chiefs | rock
+The Hives | rock
+Jet | rock
+Wolfmother | rock
+Royal Blood | rock
+Greta Van Fleet | rock
+Måneskin | rock
+Aerosmith | rock
+Kiss | rock
+Van Halen | rock
+Def Leppard | rock
+Scorpions | rock
+Iron Maiden | rock
+Black Sabbath | rock
+Ozzy Osbourne | rock
+The Doors | rock
+The Who | rock
+The Kinks | rock
+The Animals | rock
+Jimi Hendrix | rock
+Supertramp | rock
+Boston | rock
+Foreigner | rock
+Status Quo | rock
+Simple Minds | rock
+Placebo | rock
+Keane | rock
+Snow Patrol | rock
+The Verve | rock
+Pulp | rock
+Suede | rock
+Stone Temple Pilots | rock
+Soundgarden | rock
+Alice In Chains | rock
+Audioslave | rock
+Bloc Party | rock
+Editors | rock
+Interpol | rock
+Arcade Fire | rock
+Vampire Weekend | rock
+Mumford & Sons | rock
+The Lumineers | rock
+Nothing But Thieves | rock
+Wolf Alice | rock
+Fontaines D.C. | rock
+Idles | rock
+Sleep Token | rock
+Ghost | rock
+Rammstein | rock
+TV-2 | rock
+Shu-bi-dua | rock
+Sort Sol | rock
+The Minds of 99 | rock
+Nephew | rock
+Magtens Korridorer | rock
+Mew | rock
+Carpark North | rock
+Dizzy Mizz Lizzy | rock
+
+# Pop
+Ariana Grande | pop
+Selena Gomez | pop
+Charli xcx | pop
+Tate McRae | pop
+Gracie Abrams | pop
+Conan Gray | pop
+Shawn Mendes | pop
+Camila Cabello | pop
+Zara Larsson | pop
+Ellie Goulding | pop
+Jess Glynne | pop
+Rita Ora | pop
+Anne-Marie | pop
+Ava Max | pop
+Bebe Rexha | pop
+Halsey | pop
+Lana Del Rey | pop
+Kesha | pop
+P!nk | pop
+Christina Aguilera | pop
+Jennifer Lopez | pop
+Mariah Carey | pop
+Janet Jackson | pop
+Prince | pop
+Stevie Wonder | pop
+Bee Gees | pop
+Earth, Wind & Fire | pop
+Tears For Fears | pop
+Duran Duran | pop
+Depeche Mode | pop
+Pet Shop Boys | pop
+Eurythmics | pop
+Culture Club | pop
+Roxette | pop
+Robbie Williams | pop
+Take That | pop
+One Direction | pop
+Niall Horan | pop
+Zayn | pop
+Sam Smith | pop
+James Arthur | pop
+George Ezra | pop
+Tom Odell | pop
+Noah Kahan | pop
+Jason Derulo | pop
+Charlie Puth | pop
+Meghan Trainor | pop
+Kygo | pop
+Martin Garrix | pop
+Swedish House Mafia | pop
+Clean Bandit | pop
+The Chainsmokers | pop
+Marshmello | pop
+Alan Walker | pop
+Robin Schulz | pop
+Lost Frequencies | pop
+Rema | pop
+Bad Bunny | pop
+Rosalía | pop
+KAROL G | pop
+BLACKPINK | pop
+BTS | pop
+Christopher | pop
+Rasmus Seebach | pop
+Oh Land | pop
+Tessa | pop
+Joey Moe | pop
+Burhan G | pop
+Infernal | pop
+Aura Dione | pop
+Tobias Rahim | pop
+
+# Hip-hop
+Playboi Carti | hiphop
+Don Toliver | hiphop
+Lil Baby | hiphop
+Gunna | hiphop
+Young Thug | hiphop
+21 Savage | hiphop
+Lil Durk | hiphop
+Polo G | hiphop
+Roddy Ricch | hiphop
+DaBaby | hiphop
+Jack Harlow | hiphop
+Central Cee | hiphop
+Dave | hiphop
+Stormzy | hiphop
+Skepta | hiphop
+Ice Spice | hiphop
+Megan Thee Stallion | hiphop
+Nas | hiphop
+Ice Cube | hiphop
+N.W.A. | hiphop
+Cypress Hill | hiphop
+Busta Rhymes | hiphop
+Missy Elliott | hiphop
+Ludacris | hiphop
+T.I. | hiphop
+Nelly | hiphop
+Wiz Khalifa | hiphop
+Logic | hiphop
+Joey Bada$$ | hiphop
+Denzel Curry | hiphop
+JID | hiphop
+Vince Staples | hiphop
+Freddie Gibbs | hiphop
+Isaiah Rashad | hiphop
+Joyner Lucas | hiphop
+NF | hiphop
+Russ | hiphop
+Trippie Redd | hiphop
+Lil Peep | hiphop
+Ski Mask The Slump God | hiphop
+Kodak Black | hiphop
+Lil Tecca | hiphop
+Offset | hiphop
+Quavo | hiphop
+Tyga | hiphop
+Big Sean | hiphop
+Chance the Rapper | hiphop
+Anderson .Paak | hiphop
+Marlon Craft | hiphop
+Gilli | hiphop
+Kesi | hiphop
+Sivas | hiphop
+Branco | hiphop
+Benny Jamz | hiphop
+L.O.C. | hiphop
+Suspekt | hiphop
+Ukendt Kunstner | hiphop
