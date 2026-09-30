@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Songless Editor</title>
+  <meta name="description" content="Add a song to Songless or fix where its hook starts.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23151a2e'/%3E%3Cpath d='M9 17V7l9-2v10' fill='none' stroke='%23f5b83d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='17' r='2' fill='%23f5b83d'/%3E%3Ccircle cx='16' cy='15' r='2' fill='%23f5b83d'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/editor.js"></script>
+</head>
+<body class="editor">
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="./">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17V7l9-2v10"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="15" r="2"/></svg>
+        <span>Songless</span><span class="tag">Editor</span>
+      </a>
+      <a href="./">Back to the game</a>
+    </header>
+
+    <section class="card">
+      <h1>Add or fix a song</h1>
+      <p class="hint">
+        Paste a YouTube link for a new song, or pick an existing song to fix its hook.
+        "Save in this browser" puts it in the game on this device right away.
+        To give it to everyone, copy the line into <code>data/songs.txt</code>, run
+        <code>python tools/build_songs.py</code> and commit.
+      </p>
+
+      <div class="form-grid">
+        <label class="field full">Fix an existing song (songs with a guessed hook are listed first)
+          <select id="existing">
+            <option value="">Choose a song...</option>
+          </select>
+        </label>
+
+        <label class="field full">YouTube link or video id
+          <div class="row">
+            <input id="yt" type="text" placeholder="https://www.youtube.com/watch?v=..." style="flex:1">
+            <button type="button" class="small-btn accent" id="load-video">Load video</button>
+          </div>
+        </label>
+      </div>
+
+      <div class="video-frame visible" id="video-frame" hidden>
+        <div id="player"></div>
+      </div>
+
+      <div class="form-grid">
+        <label class="field">Artist <input id="artist" type="text" autocomplete="off"></label>
+        <label class="field">Title <input id="title" type="text" autocomplete="off"></label>
+
+        <div class="field full">Genre
+          <div class="genre-checks" id="genres">
+            <label><input type="checkbox" value="rock"> Rock</label>
+            <label><input type="checkbox" value="pop"> Pop</label>
+            <label><input type="checkbox" value="hiphop"> Hip-hop</label>
+            <label><input type="checkbox" value="other"> Other</label>
+          </div>
+        </div>
+
+        <div class="field full">Start of song (for "Start" mode, normally 0:00)
+          <div class="time-row">
+            <input id="start" type="text" value="0:00" inputmode="decimal">
+            <button type="button" class="small-btn" id="set-start">Use current time</button>
+          </div>
+        </div>
+
+        <div class="field full">Main hook (for "Hook" mode)
+          <div class="time-row">
+            <input id="hook" type="text" value="0:45" inputmode="decimal">
+            <button type="button" class="small-btn" id="set-hook">Use current time</button>
+          </div>
+        </div>
+
+        <div class="field full">Test the clips
+          <div class="row" id="test-from">
+            <label><input type="radio" name="test-from" value="hook" checked> from the hook</label>
+            <label><input type="radio" name="test-from" value="start"> from the start</label>
+          </div>
+          <div class="row" id="test-buttons"></div>
+        </div>
+
+        <label class="field full">Line for data/songs.txt
+          <div class="row">
+            <input id="line" type="text" readonly style="flex:1">
+            <button type="button" class="small-btn" id="copy-line">Copy</button>
+          </div>
+        </label>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button type="button" class="primary" id="save">Save in this browser</button>
+        <span class="hint" id="status" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Songs saved in this browser</h2>
+      <p class="hint">These only exist on this device until you add the lines below to data/songs.txt.</p>
+      <ul class="saved-list" id="saved"></ul>
+      <label class="field" style="margin-top:12px">All lines
+        <textarea id="all-lines" readonly></textarea>
+      </label>
+      <div class="row" style="margin-top:8px">
+        <button type="button" class="small-btn" id="copy-all">Copy all lines</button>
+        <button type="button" class="small-btn" id="clear-broken">Retry videos that failed on this device</button>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </div>
+</body>
+</html>

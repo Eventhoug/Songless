@@ -1,0 +1,9 @@
+{
+  "name": "songless-infinite",
+  "private": true,
+  "type": "module",
+  "description": "Guess-the-song game. No build step; this file only exists for the tests.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

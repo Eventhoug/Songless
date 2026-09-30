@@ -1,0 +1,440 @@
+# Songless song list
+#
+# One song per line:
+#   Artist - Title | genre
+# Genres: rock, pop, hiphop, other. A song can have more than one: "pop,rock".
+#
+# Optional extras (add after the genre, separated by " | "):
+#   | hook=1:05       where the "Hook" mode starts (otherwise found automatically)
+#   | start=0:02      where the "Start" mode starts (default 0:00, use it to skip silence)
+#   | yt=VIDEO_ID     use exactly this YouTube video (the id or a full link)
+#
+# After editing, run:  python tools/build_songs.py
+# Lines starting with # are ignored.
+
+# === Rock ===
+Radiohead - Creep | rock
+Radiohead - Karma Police | rock
+Radiohead - No Surprises | rock
+Radiohead - Paranoid Android | rock
+Radiohead - High and Dry | rock
+Radiohead - Fake Plastic Trees | rock
+Radiohead - Street Spirit (Fade Out) | rock
+Radiohead - Everything In Its Right Place | rock
+Radiohead - Just | rock
+Radiohead - Let Down | rock
+Dire Straits - Sultans of Swing | rock
+Dire Straits - Money for Nothing | rock
+Dire Straits - Walk of Life | rock
+Dire Straits - Brothers in Arms | rock
+Dire Straits - Romeo and Juliet | rock
+Dire Straits - So Far Away | rock
+Dire Straits - Private Investigations | rock
+Dire Straits - Tunnel of Love | rock
+Dire Straits - Lady Writer | rock
+blink-182 - All the Small Things | rock
+blink-182 - What's My Age Again? | rock
+blink-182 - I Miss You | rock
+blink-182 - Adam's Song | rock
+blink-182 - First Date | rock
+blink-182 - Feeling This | rock
+blink-182 - Dammit | rock
+blink-182 - The Rock Show | rock
+blink-182 - Always | rock
+Queen - Bohemian Rhapsody | rock
+Queen - Don't Stop Me Now | rock
+Queen - Another One Bites the Dust | rock
+Queen - We Will Rock You | rock
+Queen - Somebody to Love | rock
+Queen - Under Pressure | rock
+Queen - I Want to Break Free | rock
+Nirvana - Smells Like Teen Spirit | rock
+Nirvana - Come as You Are | rock
+Nirvana - Lithium | rock
+Nirvana - Heart-Shaped Box | rock
+Foo Fighters - Everlong | rock
+Foo Fighters - The Pretender | rock
+Foo Fighters - Learn to Fly | rock
+Foo Fighters - Best of You | rock
+Red Hot Chili Peppers - Californication | rock
+Red Hot Chili Peppers - Can't Stop | rock
+Red Hot Chili Peppers - Scar Tissue | rock
+Red Hot Chili Peppers - Under the Bridge | rock
+Red Hot Chili Peppers - Otherside | rock
+Red Hot Chili Peppers - Snow (Hey Oh) | rock
+Green Day - Basket Case | rock
+Green Day - Boulevard of Broken Dreams | rock
+Green Day - American Idiot | rock
+Green Day - Good Riddance (Time of Your Life) | rock
+Green Day - Wake Me Up When September Ends | rock
+Arctic Monkeys - Do I Wanna Know? | rock
+Arctic Monkeys - R U Mine? | rock
+Arctic Monkeys - I Bet You Look Good on the Dancefloor | rock
+Arctic Monkeys - 505 | rock
+Arctic Monkeys - Why'd You Only Call Me When You're High? | rock
+Arctic Monkeys - Fluorescent Adolescent | rock
+The Killers - Mr. Brightside | rock
+The Killers - Somebody Told Me | rock
+The Killers - Human | rock
+The Killers - When You Were Young | rock
+Oasis - Wonderwall | rock
+Oasis - Don't Look Back in Anger | rock
+Oasis - Champagne Supernova | rock
+Oasis - Live Forever | rock
+Muse - Uprising | rock
+Muse - Supermassive Black Hole | rock
+Muse - Hysteria | rock
+Muse - Starlight | rock
+AC/DC - Highway to Hell | rock
+AC/DC - Back in Black | rock
+AC/DC - Thunderstruck | rock
+AC/DC - You Shook Me All Night Long | rock
+Guns N' Roses - Sweet Child O' Mine | rock
+Guns N' Roses - Welcome to the Jungle | rock
+Guns N' Roses - November Rain | rock
+Guns N' Roses - Paradise City | rock
+Led Zeppelin - Stairway to Heaven | rock
+Led Zeppelin - Whole Lotta Love | rock
+Led Zeppelin - Immigrant Song | rock
+Pink Floyd - Another Brick in the Wall, Pt. 2 | rock
+Pink Floyd - Wish You Were Here | rock
+Pink Floyd - Comfortably Numb | rock
+Pink Floyd - Money | rock
+Fleetwood Mac - Dreams | rock
+Fleetwood Mac - The Chain | rock
+Fleetwood Mac - Go Your Own Way | rock
+Fleetwood Mac - Everywhere | rock
+Linkin Park - In the End | rock
+Linkin Park - Numb | rock
+Linkin Park - What I've Done | rock
+Linkin Park - Crawling | rock
+The White Stripes - Seven Nation Army | rock
+My Chemical Romance - Welcome to the Black Parade | rock
+My Chemical Romance - Helena | rock
+My Chemical Romance - I'm Not Okay (I Promise) | rock
+My Chemical Romance - Teenagers | rock
+The Offspring - The Kids Aren't Alright | rock
+The Offspring - Pretty Fly (for a White Guy) | rock
+The Offspring - Self Esteem | rock
+The Offspring - You're Gonna Go Far, Kid | rock
+Weezer - Buddy Holly | rock
+Weezer - Say It Ain't So | rock
+Weezer - Island in the Sun | rock
+Toto - Africa | rock
+Toto - Hold the Line | rock
+Toto - Rosanna | rock
+The Police - Every Breath You Take | rock
+The Police - Roxanne | rock
+The Police - Message in a Bottle | rock
+The Beatles - Hey Jude | rock
+The Beatles - Let It Be | rock
+The Beatles - Here Comes the Sun | rock
+The Beatles - Come Together | rock
+The Rolling Stones - (I Can't Get No) Satisfaction | rock
+The Rolling Stones - Paint It, Black | rock
+The Rolling Stones - Gimme Shelter | rock
+Eagles - Hotel California | rock
+Bon Jovi - Livin' on a Prayer | rock
+Bon Jovi - It's My Life | rock
+Bon Jovi - You Give Love a Bad Name | rock
+Journey - Don't Stop Believin' | rock
+Survivor - Eye of the Tiger | rock
+Europe - The Final Countdown | rock
+Bruce Springsteen - Born in the U.S.A. | rock
+Bruce Springsteen - Dancing in the Dark | rock
+U2 - With or Without You | rock
+U2 - One | rock
+U2 - Beautiful Day | rock
+U2 - Sunday Bloody Sunday | rock
+The Cure - Boys Don't Cry | rock
+The Cure - Just Like Heaven | rock
+The Cure - Friday I'm in Love | rock
+Blur - Song 2 | rock
+Blur - Parklife | rock
+The Strokes - Last Nite | rock
+The Strokes - Reptilia | rock
+Kings of Leon - Sex on Fire | rock
+Kings of Leon - Use Somebody | rock
+Franz Ferdinand - Take Me Out | rock
+Pearl Jam - Alive | rock
+Pearl Jam - Black | rock
+Metallica - Enter Sandman | rock
+Metallica - Nothing Else Matters | rock
+Metallica - Master of Puppets | rock
+Deep Purple - Smoke on the Water | rock
+Lynyrd Skynyrd - Sweet Home Alabama | rock
+Creedence Clearwater Revival - Fortunate Son | rock
+Creedence Clearwater Revival - Have You Ever Seen the Rain | rock
+Fall Out Boy - Sugar, We're Goin Down | rock
+Fall Out Boy - Centuries | rock
+Paramore - Misery Business | rock
+Paramore - Still into You | rock
+Sum 41 - Fat Lip | rock
+Sum 41 - In Too Deep | rock
+The Clash - Should I Stay or Should I Go | rock
+The Clash - London Calling | rock
+The Smashing Pumpkins - 1979 | rock
+The Smashing Pumpkins - Bullet with Butterfly Wings | rock
+David Bowie - Heroes | rock
+David Bowie - Starman | rock
+David Bowie - Space Oddity | rock
+Tame Impala - The Less I Know the Better | rock
+Tame Impala - Let It Happen | rock
+
+# === Rock and pop ===
+Coldplay - Yellow | pop,rock
+Coldplay - The Scientist | pop,rock
+Coldplay - Viva la Vida | pop,rock
+Coldplay - Fix You | pop,rock
+Coldplay - Clocks | pop,rock
+Imagine Dragons - Radioactive | pop,rock
+Imagine Dragons - Believer | pop,rock
+Imagine Dragons - Demons | pop,rock
+
+# === Pop ===
+Michael Jackson - Billie Jean | pop
+Michael Jackson - Beat It | pop
+Michael Jackson - Thriller | pop
+Michael Jackson - Smooth Criminal | pop
+Michael Jackson - Man in the Mirror | pop
+Michael Jackson - Don't Stop 'Til You Get Enough | pop
+Madonna - Like a Prayer | pop
+Madonna - Hung Up | pop
+Madonna - Material Girl | pop
+ABBA - Dancing Queen | pop
+ABBA - Mamma Mia | pop
+ABBA - Gimme! Gimme! Gimme! (A Man After Midnight) | pop
+ABBA - Take a Chance on Me | pop
+ABBA - Waterloo | pop
+ABBA - The Winner Takes It All | pop
+Taylor Swift - Shake It Off | pop
+Taylor Swift - Blank Space | pop
+Taylor Swift - Love Story | pop
+Taylor Swift - Anti-Hero | pop
+Taylor Swift - Cruel Summer | pop
+Taylor Swift - You Belong with Me | pop
+Dua Lipa - Levitating | pop
+Dua Lipa - Don't Start Now | pop
+Dua Lipa - New Rules | pop
+Dua Lipa - Houdini | pop
+The Weeknd - Blinding Lights | pop
+The Weeknd - Starboy | pop
+The Weeknd - Save Your Tears | pop
+The Weeknd - Can't Feel My Face | pop
+The Weeknd - The Hills | pop
+Harry Styles - As It Was | pop
+Harry Styles - Watermelon Sugar | pop
+Harry Styles - Sign of the Times | pop
+Harry Styles - Adore You | pop
+Billie Eilish - bad guy | pop
+Billie Eilish - Happier Than Ever | pop
+Billie Eilish - What Was I Made For? | pop
+Billie Eilish - BIRDS OF A FEATHER | pop
+Billie Eilish - ocean eyes | pop
+Bruno Mars - Just the Way You Are | pop
+Bruno Mars - Locked Out of Heaven | pop
+Bruno Mars - 24K Magic | pop
+Bruno Mars - Grenade | pop
+Mark Ronson - Uptown Funk | pop
+Lady Gaga - Bad Romance | pop
+Lady Gaga - Poker Face | pop
+Lady Gaga - Just Dance | pop
+Lady Gaga - Shallow | pop
+Lady Gaga - Die with a Smile | pop
+Ed Sheeran - Shape of You | pop
+Ed Sheeran - Perfect | pop
+Ed Sheeran - Thinking Out Loud | pop
+Ed Sheeran - Bad Habits | pop
+Adele - Rolling in the Deep | pop
+Adele - Someone Like You | pop
+Adele - Hello | pop
+Adele - Skyfall | pop
+Katy Perry - Roar | pop
+Katy Perry - Firework | pop
+Katy Perry - Teenage Dream | pop
+Katy Perry - Hot n Cold | pop
+Britney Spears - ...Baby One More Time | pop
+Britney Spears - Toxic | pop
+Britney Spears - Oops!...I Did It Again | pop
+Rihanna - Umbrella | pop
+Rihanna - Diamonds | pop
+Rihanna - We Found Love | pop
+Rihanna - Only Girl (In the World) | pop
+Justin Bieber - Sorry | pop
+Justin Bieber - Baby | pop
+Justin Bieber - Love Yourself | pop
+Justin Bieber - Peaches | pop
+Olivia Rodrigo - drivers license | pop
+Olivia Rodrigo - good 4 u | pop
+Olivia Rodrigo - vampire | pop
+Miley Cyrus - Flowers | pop
+Miley Cyrus - Wrecking Ball | pop
+Miley Cyrus - Party in the U.S.A. | pop
+a-ha - Take On Me | pop
+Whitney Houston - I Wanna Dance with Somebody (Who Loves Me) | pop
+Whitney Houston - I Will Always Love You | pop
+Avicii - Wake Me Up | pop
+Avicii - Levels | pop
+Avicii - Hey Brother | pop
+Avicii - The Nights | pop
+Daft Punk - Get Lucky | pop
+Daft Punk - One More Time | pop
+Sabrina Carpenter - Espresso | pop
+Sabrina Carpenter - Please Please Please | pop
+Chappell Roan - Good Luck, Babe! | pop
+Maroon 5 - Moves like Jagger | pop
+Maroon 5 - Sugar | pop
+Maroon 5 - This Love | pop
+Maroon 5 - She Will Be Loved | pop
+OneRepublic - Counting Stars | pop
+OneRepublic - Apologize | pop
+Elton John - Rocket Man | pop
+Elton John - Your Song | pop
+Elton John - Tiny Dancer | pop
+Elton John - I'm Still Standing | pop
+Wham! - Wake Me Up Before You Go-Go | pop
+Wham! - Last Christmas | pop
+George Michael - Careless Whisper | pop
+Cyndi Lauper - Girls Just Want to Have Fun | pop
+Kylie Minogue - Can't Get You Out of My Head | pop
+Backstreet Boys - I Want It That Way | pop
+Backstreet Boys - Everybody (Backstreet's Back) | pop
+Spice Girls - Wannabe | pop
+*NSYNC - Bye Bye Bye | pop
+Shakira - Hips Don't Lie | pop
+Shakira - Whenever, Wherever | pop
+Shakira - Waka Waka (This Time for Africa) | pop
+Beyoncé - Crazy in Love | pop
+Beyoncé - Single Ladies (Put a Ring on It) | pop
+Beyoncé - Halo | pop
+Justin Timberlake - Can't Stop the Feeling! | pop
+Justin Timberlake - SexyBack | pop
+Pharrell Williams - Happy | pop
+Lorde - Royals | pop
+Sia - Chandelier | pop
+Sia - Cheap Thrills | pop
+Calvin Harris - Summer | pop
+Calvin Harris - This Is What You Came For | pop
+David Guetta - Titanium | pop
+Glass Animals - Heat Waves | pop
+Hozier - Take Me to Church | pop
+Tones and I - Dance Monkey | pop
+Lewis Capaldi - Someone You Loved | pop
+Benson Boone - Beautiful Things | pop
+Teddy Swims - Lose Control | pop
+Rick Astley - Never Gonna Give You Up | pop
+Gorillaz - Feel Good Inc. | pop
+Gorillaz - Clint Eastwood | pop
+Major Lazer - Lean On | pop
+
+# === Pop and hip-hop ===
+Post Malone - Circles | pop,hiphop
+Post Malone - Sunflower | pop,hiphop
+Post Malone - rockstar | pop,hiphop
+Post Malone - Congratulations | pop,hiphop
+Doja Cat - Say So | pop,hiphop
+Doja Cat - Kiss Me More | pop,hiphop
+Doja Cat - Paint The Town Red | pop,hiphop
+Nicki Minaj - Super Bass | pop,hiphop
+Nicki Minaj - Starships | pop,hiphop
+Lil Nas X - Old Town Road | pop,hiphop
+Lil Nas X - MONTERO (Call Me By Your Name) | pop,hiphop
+
+# === Hip-hop ===
+Eminem - Lose Yourself | hiphop
+Eminem - Without Me | hiphop
+Eminem - The Real Slim Shady | hiphop
+Eminem - Mockingbird | hiphop
+Eminem - Stan | hiphop
+Eminem - Love the Way You Lie | hiphop
+Kendrick Lamar - HUMBLE. | hiphop
+Kendrick Lamar - Not Like Us | hiphop
+Kendrick Lamar - Alright | hiphop
+Kendrick Lamar - Money Trees | hiphop
+Kendrick Lamar - Swimming Pools (Drank) | hiphop
+Kendrick Lamar - DNA. | hiphop
+Kanye West - Stronger | hiphop
+Kanye West - Gold Digger | hiphop
+Kanye West - Heartless | hiphop
+Kanye West - POWER | hiphop
+Kanye West - Flashing Lights | hiphop
+Kanye West - Runaway | hiphop
+Drake - God's Plan | hiphop
+Drake - Hotline Bling | hiphop
+Drake - One Dance | hiphop
+Drake - Started from the Bottom | hiphop
+Drake - In My Feelings | hiphop
+Drake - Passionfruit | hiphop
+Travis Scott - SICKO MODE | hiphop
+Travis Scott - goosebumps | hiphop
+Travis Scott - HIGHEST IN THE ROOM | hiphop
+Travis Scott - FE!N | hiphop
+Travis Scott - Antidote | hiphop
+Travis Scott - 90210 | hiphop
+OutKast - Hey Ya! | hiphop
+OutKast - Ms. Jackson | hiphop
+OutKast - Roses | hiphop
+50 Cent - In da Club | hiphop
+50 Cent - Candy Shop | hiphop
+50 Cent - 21 Questions | hiphop
+Dr. Dre - Still D.R.E. | hiphop
+Dr. Dre - The Next Episode | hiphop
+Dr. Dre - Forgot About Dre | hiphop
+Snoop Dogg - Drop It Like It's Hot | hiphop
+Snoop Dogg - Gin and Juice | hiphop
+Snoop Dogg - Young, Wild & Free | hiphop
+Coolio - Gangsta's Paradise | hiphop
+The Notorious B.I.G. - Juicy | hiphop
+The Notorious B.I.G. - Hypnotize | hiphop
+The Notorious B.I.G. - Big Poppa | hiphop
+2Pac - California Love | hiphop
+2Pac - Changes | hiphop
+JAY-Z - Empire State of Mind | hiphop
+JAY-Z - 99 Problems | hiphop
+Kid Cudi - Pursuit of Happiness | hiphop
+Kid Cudi - Day 'n' Nite | hiphop
+Mac Miller - Self Care | hiphop
+Mac Miller - Good News | hiphop
+J. Cole - No Role Modelz | hiphop
+J. Cole - Middle Child | hiphop
+Tyler, The Creator - EARFQUAKE | hiphop
+Tyler, The Creator - See You Again | hiphop
+Juice WRLD - Lucid Dreams | hiphop
+Juice WRLD - All Girls Are the Same | hiphop
+XXXTENTACION - SAD! | hiphop
+XXXTENTACION - Jocelyn Flores | hiphop
+Macklemore & Ryan Lewis - Thrift Shop | hiphop
+Macklemore & Ryan Lewis - Can't Hold Us | hiphop
+A$AP Rocky - Praise the Lord (Da Shine) | hiphop
+Lil Wayne - Lollipop | hiphop
+Lil Wayne - A Milli | hiphop
+Future - Mask Off | hiphop
+Metro Boomin - Creepin' | hiphop
+Pop Smoke - Dior | hiphop
+Lil Uzi Vert - XO Tour Llif3 | hiphop
+Migos - Bad and Boujee | hiphop
+Cardi B - Bodak Yellow | hiphop
+Childish Gambino - This Is America | hiphop
+Beastie Boys - Sabotage | hiphop
+Beastie Boys - Intergalactic | hiphop
+Beastie Boys - (You Gotta) Fight for Your Right (To Party!) | hiphop
+Run-DMC - It's Tricky | hiphop
+House of Pain - Jump Around | hiphop
+
+# === Danish classics ===
+Kim Larsen - Midt om natten | rock
+Kim Larsen - Papirsklip | rock
+Gasolin' - Kvinde min | rock
+Gasolin' - Rabalderstræde | rock
+D-A-D - Sleeping My Day Away | rock
+Volbeat - Still Counting | rock
+Volbeat - Lola Montez | rock
+Aqua - Barbie Girl | pop
+Aqua - Doctor Jones | pop
+Lukas Graham - 7 Years | pop
+Lukas Graham - Mama Said | pop
+Alphabeat - Fascination | pop
+MØ - Final Song | pop
+Medina - Kun for mig | pop
+Medina - You and I | pop
+Scarlet Pleasure - What a Life | pop

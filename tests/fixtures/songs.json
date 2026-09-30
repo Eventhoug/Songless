@@ -1,0 +1,10 @@
+{"version": 1, "count": 8, "playable": 7, "songs": [
+  {"id": "radiohead-creep", "title": "Creep", "artist": "Radiohead", "genres": ["rock"], "yt": "testvideo01", "duration": 238, "start": 0, "hook": 58.5, "hookSource": "heatmap", "source": "list"},
+  {"id": "radiohead-karma-police", "title": "Karma Police", "artist": "Radiohead", "genres": ["rock"], "yt": "testvideo02", "duration": 264, "start": 0, "hook": 70, "hookSource": "estimate", "source": "list"},
+  {"id": "dire-straits-sultans-of-swing", "title": "Sultans of Swing", "artist": "Dire Straits", "genres": ["rock"], "yt": "testvideo03", "duration": 348, "start": 0, "hook": 90, "hookSource": "manual", "source": "list"},
+  {"id": "blink-182-all-the-small-things", "title": "All the Small Things", "artist": "blink-182", "genres": ["rock"], "yt": "testvideo04", "duration": 168, "start": 0, "hook": 50, "hookSource": "heatmap", "source": "list"},
+  {"id": "dua-lipa-levitating", "title": "Levitating", "artist": "Dua Lipa", "genres": ["pop"], "yt": "testvideo05", "duration": 203, "start": 0, "hook": 40, "hookSource": "heatmap", "source": "list"},
+  {"id": "drake-hotline-bling", "title": "Hotline Bling", "artist": "Drake", "genres": ["hiphop"], "yt": "testvideo06", "duration": 267, "start": 0, "hook": 45, "hookSource": "heatmap", "source": "spotify"},
+  {"id": "post-malone-circles", "title": "Circles", "artist": "Post Malone", "genres": ["pop", "hiphop"], "yt": "testvideo07", "duration": 215, "start": 0, "hook": 48, "hookSource": "heatmap", "source": "list"},
+  {"id": "not-looked-up-yet", "title": "Not Looked Up", "artist": "Nobody", "genres": ["rock"], "yt": null, "duration": null, "start": 0, "hook": 45, "hookSource": "estimate", "source": "list"}
+]}

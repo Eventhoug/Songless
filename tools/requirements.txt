@@ -1,0 +1,4 @@
+# Only needed for the song tools (not for playing the game).
+# "default" adds yt-dlp's recommended extras, "deno" installs the JavaScript
+# runtime yt-dlp uses for YouTube.
+yt-dlp[default,deno]
