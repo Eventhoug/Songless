@@ -8,7 +8,7 @@ A guess-the-song game for the class, inspired by Songless (lessgames.com/songles
 - **Endless.** Songs never repeat until every song in the filter has been played.
 - **Scoring.** 6 points for a first-try guess, 5 for the second try and so on. Score, streak and best streak are saved in your browser, separately for each mode and genre.
 - **Right-artist hint.** A wrong guess by the right artist is shown in yellow.
-- **Songs.** About 400 songs to start with: Radiohead, Dire Straits and blink-182 plus many other rock, pop and hip-hop artists and some Danish classics. Import your Spotify liked songs, or add songs one by one.
+- **Songs.** About 800 songs to start with: Radiohead, Dire Straits and blink-182 plus many other rock, pop and hip-hop artists, Danish songs and hits in other languages. Import your Spotify liked songs, or add songs one by one.
 
 The game is plain HTML, CSS and JavaScript, with no build step. Music plays through a hidden YouTube player, which is the free option that can start anywhere in a song. The song tools are written in Python.
 
@@ -79,7 +79,7 @@ If you'd rather use GitHub Pages: **Settings, Pages**, then "Deploy from a branc
 1. **Choose what to play.** Pick a genre in the tabs under the logo (All, Rock, Pop, Hip Hop), and *Start of song* or *Main hook* in the small toggle below them.
 2. **Listen.** Press the big green play button, or Space.
 3. **Guess.** Search for a title or artist and pick the song from the list: clicking it, or pressing Enter on the highlighted one, is your guess.
-4. **Skip** unlocks the next, longer clip.
+4. **Skip** unlocks the next, longer clip. If a clip is playing, it keeps playing to the new length, and the bar only resets when the clip ends.
 5. **Next song.** After the answer is shown, press **Next song**, or Enter.
 
 The icons at the top right open *How to play*, *Stats* and *Settings* (volume, reset stats). The menu at the top left links to the song editor.
